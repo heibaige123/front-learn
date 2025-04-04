@@ -1,0 +1,26 @@
+---
+import Search from '@astrojs/starlight/components/Search.astro';
+import SiteTitle from '@astrojs/starlight/components/SiteTitle.astro';
+import SocialIcons from '@astrojs/starlight/components/SocialIcons.astro';
+import ThemeSelect from '@astrojs/starlight/components/ThemeSelect.astro';
+---
+
+<div class="flex items-center justify-between">
+    <div class="flex">
+        <SiteTitle />
+    </div>
+
+    <div class="flex items-center">
+        <div class="mr-6">
+          <ThemeSelect />
+        </div>
+        
+        <div class="mr-6">
+          <SocialIcons />
+        </div>
+
+        <Search />
+    </div>
+</div>
+
+<style></style>

@@ -29,22 +29,12 @@
     "eslint-check": "eslint --max-warnings=0 .",
     "prettier-check": "prettier --check .",
     "type-check": "tsc --noEmit",
-    "precommit": "lint-staged",
-    "prepare": "husky install"
   },
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"
   },
   "prettier": "@vercel/style-guide/prettier",
-  "lint-staged": {
-    "*": [
-      "prettier --ignore-unknown --write"
-    ],
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --max-warnings=0 --fix"
-    ]
-  },
   "devDependencies": {
     "@edge-runtime/jest-environment": "1.1.0-beta.6",
     "@types/jest": "27.0.1",
