@@ -12,25 +12,102 @@ import { DDManager } from './dd-manager';
 // import { GridItemHTMLElement } from './types'; let count = 0; // TEST
 
 // TODO: merge with DDDragOpt
+/**
+ * 可调整大小组件的配置选项接口
+ */
 export interface DDResizableOpt {
+
+  /**
+   * 当未激活时是否自动隐藏调整手柄
+   */
   autoHide?: boolean;
+
+  /**
+   * 定义哪些边缘/角落可以用于调整大小（例如:'n,e,s,w,ne,se,sw,nw'）
+   */
   handles?: string;
+
+  /**
+   * 可调整的最大高度（像素）
+   */
   maxHeight?: number;
+
+  /**
+   * 向上调整时的最大高度（像素）
+   */
   maxHeightMoveUp?: number;
+
+  /**
+   * 可调整的最大宽度（像素）
+   */
   maxWidth?: number;
+
+  /**
+   * 向左调整时的最大宽度（像素）
+   */
   maxWidthMoveLeft?: number;
+
+  /**
+   * 可调整的最小高度（像素）
+   */
   minHeight?: number;
+
+  /**
+   * 可调整的最小宽度（像素）
+   */
   minWidth?: number;
+
+  /**
+   * 调整大小开始时触发的回调函数
+   */
   start?: (event: Event, ui: DDUIData) => void;
+  /**
+   * 调整大小结束时触发的回调函数
+   */
   stop?: (event: Event) => void;
+  /**
+   * 调整大小时触发的回调函数
+   */
   resize?: (event: Event, ui: DDUIData) => void;
 }
 
+/**
+ * 表示矩形缩放的倒数值接口
+ */
 interface RectScaleReciprocal {
+  /** X轴方向的缩放倒数值 */
   x: number;
+  /** Y轴方向的缩放倒数值 */
   y: number;
 }
 
+/**
+ * 可调整大小的拖拽组件类
+ * 实现了元素的大小调整功能，支持多个调整手柄和自动隐藏
+ *
+ * @extends DDBaseImplement
+ * @implements HTMLElementExtendOpt<DDResizableOpt>
+ * 
+ * @example
+ * ```typescript
+ * const resizable = new DDResizable(element, {
+ *   handles: 'n,e,s,w',
+ *   autoHide: true
+ * });
+ * ```
+ * 
+ * @property {DDResizableHandle[]} handlers - 调整大小的手柄数组
+ * @property {Rect} originalRect - 元素的原始矩形尺寸
+ * @property {RectScaleReciprocal} rectScale - 矩形缩放比例
+ * @property {GridItemHTMLElement} el - 要调整大小的目标 HTML 元素
+ * @property {DDResizableOpt} option - 可调整大小的配置选项
+ * 
+ * @fires resizestart - 开始调整大小时触发
+ * @fires resize - 调整大小过程中触发
+ * @fires resizestop - 结束调整大小时触发
+ * 
+ * @public
+ */
 export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt<DDResizableOpt> {
   /** @internal */
   protected handlers: DDResizableHandle[];

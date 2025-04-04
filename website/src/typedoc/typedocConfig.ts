@@ -11,7 +11,7 @@ const result: {
 }[] = [
     {
       entryPoints: ['src/gridstack.ts'],
-      name: 'gridstack.js',
+      name: 'gridstackjs',
       readme: 'README.md',
     },
     {
