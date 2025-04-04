@@ -3,7 +3,9 @@
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
-    "scripts": {},
+    "scripts": {
+        "add-package": "sh scripts/add-package.sh"
+    },
     "keywords": [],
     "author": "",
     "license": "ISC",
