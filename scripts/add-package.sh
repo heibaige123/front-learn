@@ -1,11 +1,14 @@
-# 文件夹名称
-dir_name='node-lru-cache'
+
 # git 地址
 git_url='git@github.com:isaacs/node-lru-cache.git'
 # 存储目录
-# storage_dir='multi-packages/vue'
-storage_dir='single-packages'
+storage_dir='multi-packages/vue'
+# storage_dir='single-packages'
 
+dir_name="vue3_core"
+# 从git_url中获取文件夹名称
+dir_name=$(echo $git_url | awk -F'/' '{print $NF}' | sed 's/\.git//')
+echo "文件夹名称: $dir_name"
 # 当前目录
 current_path=$(pwd)
 cd tmp
@@ -20,6 +23,7 @@ sub_path=$(pwd)
 cd $current_path
 git remote add $dir_name $sub_path
 git pull $dir_name
-git merge --allow-unrelated-histories $dir_name/$branch_name
-git branch -d $dir_name
+git merge --allow-unrelated-histories $dir_name/$branch_name -f
+# 移除remote
+git remote remove $dir_name
 rm -rf tmp/$dir_name
