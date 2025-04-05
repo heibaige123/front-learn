@@ -1,0 +1,80 @@
+---
+import {TbChevronDown} from 'react-icons/tb';
+
+interface Props {
+    title: string;
+    group: {
+        label: string;
+        href: string;
+    }[];
+}
+
+const {title, group} = Astro.props as Props;
+---
+
+<div class={['ml-6', 'relative', 'group'].join(' ')}>
+    <button
+        class={[
+            'flex',
+            'justify-center',
+            'items-center',
+            'px-3',
+            'transition-colors',
+            'duration-500',
+            'bg-transparent',
+            'cursor-pointer',
+            'group-hover:text-gray-500'
+        ].join(' ')}
+    >
+        <span class="mr-2">{title}</span>
+        <TbChevronDown />
+    </button>
+
+    <div
+        class={[
+            'opacity-0',
+            'invisible',
+            'absolute',
+            'top-10',
+            'right-0',
+            'transition-all',
+            'duration-300',
+            'group-hover:opacity-100',
+            'group-hover:visible',
+            'group-hover:translate-y-0'
+        ].join(' ')}
+    >
+        <div
+            class={[
+                'rounded-xl',
+                'p-3',
+                'min-w-32',
+                'border',
+                'border-gray-200',
+                'shadow',
+                'bg-white'
+            ].join(' ')}
+        >
+            {
+                group.map((item) => (
+                    <a
+                        href={item.href}
+                        class={[
+                            'block',
+                            'px-4',
+                            'py-2',
+                            'text-sm',
+                            'text-gray-700',
+                            'hover:text-indigo-400',
+                            'hover:bg-zinc-100',
+                            'rounded-md',
+                            'no-underline'
+                        ].join(' ')}
+                    >
+                        {item.label}
+                    </a>
+                ))
+            }
+        </div>
+    </div>
+</div>

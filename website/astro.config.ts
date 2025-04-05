@@ -1,11 +1,12 @@
-// @ts-check
-import { defineConfig } from 'astro/config';
+import {defineConfig} from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwind from '@astrojs/tailwind';
 
-import { getStarlightConfig, typedocPackageConfig } from './src/typedoc';
+import {getStarlightConfig, typedocPackageConfig} from './src/typedoc';
 
-const { plugins, sidebar } = getStarlightConfig(typedocPackageConfig);
+import react from '@astrojs/react';
+
+const {plugins, sidebar} = getStarlightConfig(typedocPackageConfig);
 
 // https://astro.build/config
 export default defineConfig({
@@ -18,6 +19,9 @@ export default defineConfig({
 			social: {
 				github: 'https://github.com/withastro/starlight',
 			},
+			routeMiddleware: [
+				'./src/route/header.ts'
+			],
 			components: {
 				Header: './src/components/Header.astro',
 			},
@@ -25,5 +29,8 @@ export default defineConfig({
 		tailwind({
 			applyBaseStyles: false
 		}),
+		react({
+			experimentalDisableStreaming: true
+		})
 	],
 });

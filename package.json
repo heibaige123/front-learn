@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "add-package": "sh scripts/add-package.sh"
+        "add-package": "sh scripts/add-package.sh",
+        "dev": "cd ./website && pnpm run dev"
     },
     "keywords": [],
     "author": "",

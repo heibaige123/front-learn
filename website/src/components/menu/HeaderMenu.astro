@@ -1,0 +1,18 @@
+---
+import type {StarlightRoute} from '../../../types';
+import SelectMenu from './SelectMenu.astro';
+
+const starlightRoute = Astro.locals.starlightRoute as unknown as StarlightRoute;
+
+const {headerGroup} = starlightRoute;
+---
+
+<div>
+    {
+        headerGroup.map((header) => (
+            <div class="ml-6">
+                <SelectMenu {...header} />
+            </div>
+        ))
+    }
+</div>
