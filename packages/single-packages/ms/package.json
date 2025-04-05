@@ -28,7 +28,7 @@
     "prepublishOnly": "npm run build",
     "eslint-check": "eslint --max-warnings=0 .",
     "prettier-check": "prettier --check .",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit"
   },
   "jest": {
     "preset": "ts-jest",
