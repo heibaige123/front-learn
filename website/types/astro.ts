@@ -1,13 +1,6 @@
-export interface StarlightRoute {
-    sidebar: {
-        label: string;
-        entries: {
-            entries: {
-                href: string;
+import type {StarlightRouteData} from '@astrojs/starlight/route-data';
 
-            }[];
-        }[];
-    }[];
+export interface StarlightRoute extends StarlightRouteData {
     headerGroup: {
         title: string;
         group: {
@@ -15,4 +8,6 @@ export interface StarlightRoute {
             href: string;
         }[];
     }[];
+
+    title: string;
 }

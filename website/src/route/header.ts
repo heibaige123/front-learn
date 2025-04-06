@@ -2,10 +2,10 @@ import {defineRouteMiddleware} from '@astrojs/starlight/route-data';
 import type {StarlightRoute} from '../../types';
 
 export const onRequest = defineRouteMiddleware((context) => {
-    const {sidebar, slug} = context.locals.starlightRoute as unknown as StarlightRoute;
+    const {sidebar, slug} = context.locals.starlightRoute as StarlightRoute;
 
-    (context.locals.starlightRoute as unknown as StarlightRoute).headerGroup = (context.locals.starlightRoute as unknown as StarlightRoute).headerGroup || [];
-    (context.locals.starlightRoute as unknown as StarlightRoute).headerGroup.push(getHeaderApiGroup(sidebar));
+    (context.locals.starlightRoute as StarlightRoute).headerGroup = (context.locals.starlightRoute as StarlightRoute).headerGroup || [];
+    (context.locals.starlightRoute as StarlightRoute).headerGroup.push(getHeaderApiGroup(sidebar));
 
     const api = slug?.split('/')?.[1];
     for (let i = 0, len = sidebar.length; i < len; i++) {
@@ -16,6 +16,8 @@ export const onRequest = defineRouteMiddleware((context) => {
             break;
         }
     }
+
+    (context.locals.starlightRoute as StarlightRoute).title = api;
 });
 
 function getHeaderApiGroup(sidebar: StarlightRoute['sidebar']) {

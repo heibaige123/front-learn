@@ -1,0 +1,30 @@
+---
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+import type {StarlightRoute} from '../../types';
+
+const {sidebar, title} = Astro.locals.starlightRoute as StarlightRoute;
+---
+
+<div class="">
+    <div class="px-2">
+        <div
+            class={[
+                'font-bold',
+                'text-xl',
+                'text-center',
+                'text-purple-700',
+                'bg-slate-100',
+                'py-3',
+                'rounded-md'
+            ].join(' ')}
+        >
+            {title}
+        </div>
+        <div class="border my-3 rounded-2xl"></div>
+    </div>
+
+    <SidebarPersister>
+        <SidebarSublist sublist={sidebar} />
+    </SidebarPersister>
+</div>
