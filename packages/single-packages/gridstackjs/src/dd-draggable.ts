@@ -632,7 +632,7 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
             Utils.appendTo(helper, appendTarget);
         }
         this.dragElementOriginStyle = DDDraggable.originStyleProp.reduce((styleMap, prop) => {
-            styleMap[prop] = this.el.style[prop];
+            styleMap[prop] = this.el.style[prop] as string;
             return styleMap;
         }, {} as Record<string, string>);
         return helper;
@@ -720,6 +720,7 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
             const transition = this.dragElementOriginStyle['transition'] || null;
             helper.style.transition = this.dragElementOriginStyle['transition'] = 'none'; // can't be NULL #1973
             DDDraggable.originStyleProp.forEach(
+                // @ts-ignore
                 (prop) => (helper.style[prop] = this.dragElementOriginStyle[prop] || null)
             );
             setTimeout(() => (helper.style.transition = transition), 50); // recover animation from saved vars after a pause (0 isn't enough #1973)
