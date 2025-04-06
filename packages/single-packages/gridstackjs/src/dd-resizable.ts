@@ -124,7 +124,7 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
     protected scrollEl: HTMLElement;
     /** @internal */
     protected startEvent: MouseEvent;
-    /** @internal value saved in the same order as _originStyleProp[] */
+    /** @internal 保存的值与 _originStyleProp[] 顺序一致 */
     protected elOriginStyleVal: string[];
     /** @internal */
     protected parentOriginStylePosition: string;
@@ -144,7 +144,7 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
     // have to be public else complains for HTMLElementExtendOpt ?
     constructor(public el: GridItemHTMLElement, public option: DDResizableOpt = {}) {
         super();
-        // create var event binding so we can easily remove and still look like TS methods (unlike anonymous functions)
+        // 创建变量事件绑定，以便我们可以轻松移除并且仍然看起来像 TS 方法（不像匿名函数）
         this._mouseOver = this._mouseOver.bind(this);
         this._mouseOut = this._mouseOut.bind(this);
         this.enable();
@@ -152,29 +152,47 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
         this._setupHandlers();
     }
 
+    /**
+     * 绑定事件监听器
+     * @param event - 事件名称 ('resizestart' | 'resize' | 'resizestop')
+     * @param callback - 事件触发时的回调函数
+     */
     public on(
         event: 'resizestart' | 'resize' | 'resizestop',
-        callback: (event: DragEvent) => void
+        callback: (event: Event) => void
     ): void {
         super.on(event, callback);
     }
 
+    /**
+     * 移除事件监听器
+     * @param event - 事件名称 ('resizestart' | 'resize' | 'resizestop')
+     */
     public off(event: 'resizestart' | 'resize' | 'resizestop'): void {
         super.off(event);
     }
 
+    /**
+     * 启用可调整大小功能
+     */
     public enable(): void {
         super.enable();
         this.el.classList.remove('ui-resizable-disabled');
         this._setupAutoHide(this.option.autoHide);
     }
 
+    /**
+     * 禁用可调整大小功能
+     */
     public disable(): void {
         super.disable();
         this.el.classList.add('ui-resizable-disabled');
         this._setupAutoHide(false);
     }
 
+    /**
+     * 销毁可调整大小实例，清理资源
+     */
     public destroy(): void {
         this._removeHandlers();
         this._setupAutoHide(false);
@@ -182,6 +200,11 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
         super.destroy();
     }
 
+    /**
+     * 更新可调整大小组件的选项
+     * @param opts - 新的配置选项
+     * @returns 当前的 DDResizable 实例
+     */
     public updateOption(opts: DDResizableOpt): DDResizable {
         const updateHandles = opts.handles && opts.handles !== this.option.handles;
         const updateAutoHide = opts.autoHide && opts.autoHide !== this.option.autoHide;
@@ -196,11 +219,15 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
         return this;
     }
 
-    /** @internal turns auto hide on/off */
+    /**
+     * @internal 开启或关闭自动隐藏功能
+     * @param auto - 是否启用自动隐藏
+     * @returns 当前的 DDResizable 实例
+     */
     protected _setupAutoHide(auto: boolean): DDResizable {
         if (auto) {
             this.el.classList.add('ui-resizable-autohide');
-            // use mouseover and not mouseenter to get better performance and track for nested cases
+            // 使用 mouseover 而不是 mouseenter 以获得更好的性能并支持嵌套情况
             this.el.addEventListener('mouseover', this._mouseOver);
             this.el.addEventListener('mouseout', this._mouseOut);
         } else {
@@ -215,27 +242,27 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
     }
 
     /** @internal */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected _mouseOver(e: Event): void {
-        // console.log(`${count++} pre-enter ${(this.el as GridItemHTMLElement).gridstackNode._id}`)
-        // already over a child, ignore. Ideally we just call e.stopPropagation() but see https://github.com/gridstack/gridstack.js/issues/2018
+        // 如果已经有一个子元素处于悬停状态，则忽略当前事件。
         if (DDManager.overResizeElement || DDManager.dragElement) return;
         DDManager.overResizeElement = this;
-        // console.log(`${count++} enter ${(this.el as GridItemHTMLElement).gridstackNode._id}`)
+        // 移除自动隐藏的类名以显示调整手柄。
         this.el.classList.remove('ui-resizable-autohide');
     }
 
     /** @internal */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected _mouseOut(e: Event): void {
-        // console.log(`${count++} pre-leave ${(this.el as GridItemHTMLElement).gridstackNode._id}`)
+        // 如果当前悬停的元素不是自身，则忽略当前事件。
         if (DDManager.overResizeElement !== this) return;
         delete DDManager.overResizeElement;
-        // console.log(`${count++} leave ${(this.el as GridItemHTMLElement).gridstackNode._id}`)
+        // 添加自动隐藏的类名以隐藏调整手柄。
         this.el.classList.add('ui-resizable-autohide');
     }
 
-    /** @internal */
+    /**
+     * 初始化调整大小的手柄
+     * @returns 当前的 DDResizable 实例
+     */
     protected _setupHandlers(): DDResizable {
         this.handlers = this.option.handles
             .split(',')
@@ -259,7 +286,7 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
 
     /** @internal */
     protected _resizeStart(event: MouseEvent): DDResizable {
-        this.sizeToContent = Utils.shouldSizeToContent(this.el.gridstackNode, true); // strick true only and not number
+        this.sizeToContent = Utils.shouldSizeToContent(this.el.gridstackNode, true); // 严格为 true，而不是数字
         this.originalRect = this.el.getBoundingClientRect();
         this.scrollEl = Utils.getScrollElement(this.el);
         this.scrollY = this.scrollEl.scrollTop;
@@ -292,13 +319,14 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
     /** @internal */
     protected _resizeStop(event: MouseEvent): DDResizable {
         const ev = Utils.initEvent<MouseEvent>(event, {type: 'resizestop', target: this.el});
-        // Remove style attr now, so the stop handler can rebuild style attrs
+        // 清理样式属性，以便停止处理程序可以重新构建样式属性
         this._cleanHelper();
         if (this.option.stop) {
-            this.option.stop(ev); // Note: ui() not used by gridstack so don't pass
+            this.option.stop(ev); // 注意：ui() 未被 gridstack 使用，因此不传递
         }
         this.el.classList.remove('ui-resizable-resizing');
         this.triggerEvent('resizestop', ev);
+        // 删除临时属性以释放内存
         delete this.startEvent;
         delete this.originalRect;
         delete this.temporalRect;
@@ -319,20 +347,25 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
             y: dragTransform.yScale
         };
 
-        if (getComputedStyle(this.el.parentElement).position.match(/static/)) {
+        if (getComputedStyle(this.el.parentElement).position === 'static') {
             this.el.parentElement.style.position = 'relative';
         }
         this.el.style.position = 'absolute';
         this.el.style.opacity = '0.8';
+        this.el.style.zIndex = '1000'; // 添加 zIndex 以确保调整大小时元素位于顶部
         return this;
     }
 
     /** @internal */
     protected _cleanHelper(): DDResizable {
         DDResizable._originStyleProp.forEach((prop, i) => {
-            this.el.style[prop] = this.elOriginStyleVal[i] || null;
+            this.el.style[prop] = this.elOriginStyleVal[i] || '';
         });
-        this.el.parentElement.style.position = this.parentOriginStylePosition || null;
+        if (this.parentOriginStylePosition) {
+            this.el.parentElement.style.position = this.parentOriginStylePosition;
+        } else {
+            this.el.parentElement.style.removeProperty('position');
+        }
         return this;
     }
 
@@ -340,7 +373,7 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
     protected _getChange(event: MouseEvent, dir: string): Rect {
         const oEvent = this.startEvent;
         const newRect = {
-            // Note: originalRect is a complex object, not a simple Rect, so copy out.
+            // 注意：originalRect 是一个复杂对象，而不是简单的 Rect，因此需要复制。
             width: this.originalRect.width,
             height: this.originalRect.height + this.scrolled,
             left: this.originalRect.left,
@@ -348,34 +381,34 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
         };
 
         const offsetX = event.clientX - oEvent.clientX;
-        const offsetY = this.sizeToContent ? 0 : event.clientY - oEvent.clientY; // prevent vert resize
+        const offsetY = this.sizeToContent ? 0 : event.clientY - oEvent.clientY; // 防止垂直调整大小
         let moveLeft: boolean;
         let moveUp: boolean;
 
-        if (dir.indexOf('e') > -1) {
+        if (dir.includes('e')) {
             newRect.width += offsetX;
-        } else if (dir.indexOf('w') > -1) {
+        } else if (dir.includes('w')) {
             newRect.width -= offsetX;
             newRect.left += offsetX;
             moveLeft = true;
         }
-        if (dir.indexOf('s') > -1) {
+        if (dir.includes('s')) {
             newRect.height += offsetY;
-        } else if (dir.indexOf('n') > -1) {
+        } else if (dir.includes('n')) {
             newRect.height -= offsetY;
             newRect.top += offsetY;
             moveUp = true;
         }
         const constrain = this._constrainSize(newRect.width, newRect.height, moveLeft, moveUp);
         if (Math.round(newRect.width) !== Math.round(constrain.width)) {
-            // round to ignore slight round-off errors
-            if (dir.indexOf('w') > -1) {
+            // 四舍五入以忽略轻微的舍入误差
+            if (dir.includes('w')) {
                 newRect.left += newRect.width - constrain.width;
             }
             newRect.width = constrain.width;
         }
         if (Math.round(newRect.height) !== Math.round(constrain.height)) {
-            if (dir.indexOf('n') > -1) {
+            if (dir.includes('n')) {
                 newRect.top += newRect.height - constrain.height;
             }
             newRect.height = constrain.height;
@@ -383,7 +416,7 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
         return newRect;
     }
 
-    /** @internal constrain the size to the set min/max values */
+    /** @internal 约束尺寸到设置的最小/最大值 */
     protected _constrainSize(
         oWidth: number,
         oHeight: number,
@@ -391,10 +424,10 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
         moveUp: boolean
     ): Size {
         const o = this.option;
-        const maxWidth = (moveLeft ? o.maxWidthMoveLeft : o.maxWidth) || Number.MAX_SAFE_INTEGER;
-        const minWidth = o.minWidth / this.rectScale.x || oWidth;
-        const maxHeight = (moveUp ? o.maxHeightMoveUp : o.maxHeight) || Number.MAX_SAFE_INTEGER;
-        const minHeight = o.minHeight / this.rectScale.y || oHeight;
+        const maxWidth = (moveLeft ? o.maxWidthMoveLeft : o.maxWidth) ?? Number.MAX_SAFE_INTEGER;
+        const minWidth = (o.minWidth ?? 0) / this.rectScale.x;
+        const maxHeight = (moveUp ? o.maxHeightMoveUp : o.maxHeight) ?? Number.MAX_SAFE_INTEGER;
+        const minHeight = (o.minHeight ?? 0) / this.rectScale.y;
         const width = Math.min(maxWidth, Math.max(minWidth, oWidth));
         const height = Math.min(maxHeight, Math.max(minHeight, oHeight));
         return {width, height};
@@ -428,13 +461,12 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
         delete this.handlers;
         return this;
     }
-
     /** @internal */
     protected _ui = (): DDUIData => {
         const containmentEl = this.el.parentElement;
         const containmentRect = containmentEl.getBoundingClientRect();
         const newRect = {
-            // Note: originalRect is a complex object, not a simple Rect, so copy out.
+            // 注意：originalRect 是一个复杂对象，而不是简单的 Rect，因此需要复制。
             width: this.originalRect.width,
             height: this.originalRect.height + this.scrolled,
             left: this.originalRect.left,
@@ -450,17 +482,17 @@ export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt
                 width: rect.width * this.rectScale.x,
                 height: rect.height * this.rectScale.y
             }
-            /* Gridstack ONLY needs position set above... keep around in case.
-      element: [this.el], // The object representing the element to be resized
-      helper: [], // TODO: not support yet - The object representing the helper that's being resized
-      originalElement: [this.el],// we don't wrap here, so simplify as this.el //The object representing the original element before it is wrapped
-      originalPosition: { // The position represented as { left, top } before the resizable is resized
-        left: this.originalRect.left - containmentRect.left,
-        top: this.originalRect.top - containmentRect.top
+            /* Gridstack 仅需要上面设置的 position... 保留以备不时之需。
+      element: [this.el], // 表示要调整大小的元素的对象
+      helper: [], // TODO: 尚未支持 - 表示正在调整大小的辅助对象
+      originalElement: [this.el], // 我们不在此处包装，因此简化为 this.el // 表示调整大小之前的原始元素的对象
+      originalPosition: { // 表示调整大小之前的 { left, top } 位置
+      left: this.originalRect.left - containmentRect.left,
+      top: this.originalRect.top - containmentRect.top
       },
-      originalSize: { // The size represented as { width, height } before the resizable is resized
-        width: this.originalRect.width,
-        height: this.originalRect.height
+      originalSize: { // 表示调整大小之前的 { width, height } 尺寸
+      width: this.originalRect.width,
+      height: this.originalRect.height
       }
       */
         };

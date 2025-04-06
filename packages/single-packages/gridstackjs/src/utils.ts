@@ -12,35 +12,35 @@ import {
     GridStackWidget
 } from './types';
 
-/** Interface for height data with value and unit
+/**
  * 高度数据接口，包含值和单位 */
 export interface HeightData {
-    /** height value
+    /**
      * 高度值 */
     h: number;
-    /** height unit (px, em, rem, etc)
+    /**
      * 高度单位（px、em、rem等） */
     unit: string;
 }
 
-/** Interface for drag transformation data
+/**
  * 拖动变换数据接口 */
 export interface DragTransform {
-    /** scale factor on x axis
+    /**
      * x轴上的缩放因子 */
     xScale: number;
-    /** scale factor on y axis
+    /**
      * y轴上的缩放因子 */
     yScale: number;
-    /** offset on x axis
+    /**
      * x轴上的偏移量 */
     xOffset: number;
-    /** offset on y axis
+    /**
      * y轴上的偏移量 */
     yOffset: number;
 }
 
-/** checks for obsolete method names
+/**
  * 检查过时的方法名称 */
 // eslint-disable-next-line
 export function obsolete(
@@ -67,7 +67,7 @@ export function obsolete(
     return wrapper;
 }
 
-/** checks for obsolete grid options (can be used for any fields, but msg is about options)
+/**
  * 检查过时的网格选项（可用于任何字段，但消息是关于选项的） */
 export function obsoleteOpts(
     opts: GridStackOptions,
@@ -89,7 +89,7 @@ export function obsoleteOpts(
     }
 }
 
-/** checks for obsolete grid options which are gone
+/**
  * 检查已删除的过时网格选项 */
 export function obsoleteOptsDel(
     opts: GridStackOptions,
@@ -102,7 +102,7 @@ export function obsoleteOptsDel(
     }
 }
 
-/** checks for obsolete Jquery element attributes
+/**
  * 检查过时的jQuery元素属性 */
 export function obsoleteAttr(el: HTMLElement, oldName: string, newName: string, rev: string): void {
     const oldAttr = el.getAttribute(oldName);
@@ -123,15 +123,10 @@ export function obsoleteAttr(el: HTMLElement, oldName: string, newName: string, 
 }
 
 /**
- * Utility methods
- *
  * 实用工具方法
  */
 export class Utils {
     /**
-     * convert a potential selector into actual list of html elements.
-     * optional root which defaults to document (for shadow dom)
-     *
      * 根据各种可能的输入类型获取HTML元素。
      *
      * @param els - 元素选择器。可以是：
@@ -179,8 +174,6 @@ export class Utils {
     }
 
     /**
-     * convert a potential selector into actual single element. optional root which defaults to document (for shadow dom)
-     *
      * 根据输入的选择器获取HTMLElement，或者如果输入已经是HTMLElement则直接返回该元素。
      *
      * @param els - 元素标识符或HTMLElement：可以是字符串选择器（id、类、属性或简单名称）或HTMLElement。
@@ -238,8 +231,6 @@ export class Utils {
     }
 
     /**
-     * true if widget (or grid) makes this item lazyLoad
-     *
      * 确定一个节点是否应该被懒加载。
      *
      * @param n - 要检查懒加载的GridStackNode
@@ -254,8 +245,6 @@ export class Utils {
     }
 
     /**
-     * create a div with the given classes
-     *
      * 创建一个带有指定类名的div元素
      *
      * @param classes - 要添加到div元素的CSS类名数组
@@ -280,8 +269,6 @@ export class Utils {
     }
 
     /**
-     * true if we should resize to content. strict=true when only 'sizeToContent:true' and not a number which lets user adjust
-     *
      * 根据节点配置和网格选项确定节点是否应该根据内容调整大小。
      *
      * @param n - 要检查的网格节点
@@ -301,8 +288,6 @@ export class Utils {
     }
 
     /**
-     * returns true if a and b overlap
-     *
      * 检查两个网格位置是否重叠或相交。
      *
      * @param a - 第一个网格位置
@@ -320,8 +305,6 @@ export class Utils {
     }
 
     /**
-     * returns true if a and b touch edges or corners
-     *
      * 检查两个网格位置是否彼此接触（共享边缘或角落）。
      *
      * @param a - 第一个网格位置
@@ -343,8 +326,6 @@ export class Utils {
     }
 
     /**
-     * returns the area a and b overlap
-     *
      * 计算两个网格位置重叠的面积
      *
      * @param a - 第一个网格位置
@@ -371,14 +352,14 @@ export class Utils {
         return (x1 - x0) * (y1 - y0);
     }
 
-    /** returns the area
+    /**
      * 返回面积 */
     static area(a: GridStackPosition): number {
         return a.w * a.h;
     }
 
     /**
-     * Sorts array of nodes
+     *
      * @param nodes array to sort
      * @param dir 1 for ascending, -1 for descending (optional)
      *
@@ -396,8 +377,6 @@ export class Utils {
     }
 
     /**
-     * find an item by id
-     *
      * 通过id查找项目
      * */
     static find(nodes: GridStackNode[], id: string): GridStackNode | undefined {
@@ -405,8 +384,6 @@ export class Utils {
     }
 
     /**
-     * convert value to boolean
-     *
      * 将值转换为布尔值
      * */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -422,8 +399,6 @@ export class Utils {
     }
 
     /**
-     * convert string to number
-     *
      * 将字符串转换为数字
      * */
     static toNumber(value: null | string): number {
@@ -431,8 +406,6 @@ export class Utils {
     }
 
     /**
-     * parse height value with unit
-     *
      * 解析高度值并提取数值和单位部分
      *
      * @param val - 要解析的高度值，可以是数字或带单位的字符串（如'10px'、'2em'等）
@@ -473,7 +446,7 @@ export class Utils {
         return {h, unit};
     }
 
-    /** copies unset fields in target to use the given default sources values
+    /**
      * 将目标中未设置的字段复制为使用给定的默认源值 */
     // eslint-disable-next-line
     /** 将源对象中的所有未在目标对象中设置的字段复制到目标对象中
@@ -514,8 +487,6 @@ export class Utils {
     }
 
     /**
-     * given 2 objects return true if they have the same values. Checks for Object {} having same fields and values (just 1 level down)
-     *
      * 比较两个对象是否完全相等（仅检查一层深度）
      *
      * @param a - 第一个要比较的对象
@@ -542,8 +513,6 @@ export class Utils {
     }
 
     /**
-     * copies over b size & position (GridStackPosition), and optionally min/max as well
-     *
      * 从一个网格部件复制大小和位置属性到另一个部件
      *
      * @param a - 目标网格部件，接收复制的属性
@@ -570,8 +539,6 @@ export class Utils {
     }
 
     /**
-     * true if a and b has same size & position
-     *
      * 检查两个网格位置是否完全相同
      *
      * @param a - 第一个网格位置
@@ -595,8 +562,6 @@ export class Utils {
     }
 
     /**
-     * given a node, makes sure it's min/max are valid
-     *
      * 清理节点的最小/最大尺寸限制
      *
      * 删除节点中值为0、undefined或null的最小/最大尺寸属性。
@@ -627,8 +592,6 @@ export class Utils {
     }
 
     /**
-     * removes field from the first object if same as the second objects (like diffing) and internal '_' for saving
-     *
      * 移除第一个对象中与第二个对象相同的字段，以及内部字段（以'_'开头的字段）
      *
      * @param a - 要清理的对象
@@ -676,8 +639,6 @@ export class Utils {
     }
 
     /**
-     * removes internal fields '_' and default values for saving
-     *
      * 删除内部字段和默认值以便保存
      *
      * @param n - 需要清理的网格节点
@@ -724,8 +685,6 @@ export class Utils {
     // }
 
     /**
-     * delay calling the given function for given delay, preventing new calls from happening while waiting
-     *
      * 节流函数，用于限制函数的调用频率
      *
      * @param func - 要节流的函数
@@ -760,8 +719,6 @@ export class Utils {
     }
 
     /**
-     * remove positioning styles from element
-     *
      * 删除一个HTML元素中的定位样式（position、left、top、width、height）
      * @param el - 要删除定位样式的HTML元素
      */
@@ -786,8 +743,6 @@ export class Utils {
     }
 
     /**
-     * @internal returns the passed element if scrollable, else the closest parent that will, up to the entire document scrolling element
-     *
      * 获取可滚动的元素
      *
      * @param el - 可选的起始HTML元素。如果未提供，则返回文档的滚动元素。
@@ -820,8 +775,6 @@ export class Utils {
     }
 
     /**
-     * @internal update scroll position based on element position
-     *
      * 根据元素位置更新滚动位置
      *
      * @param el - 要滚动的HTML元素
@@ -875,8 +828,6 @@ export class Utils {
     }
 
     /**
-     * @internal Function used to scroll the page.
-     *
      * @param event `MouseEvent` that triggers the resize
      * @param el `HTMLElement` that's being resized
      * @param distance Distance from the V edges to start scrolling
@@ -916,8 +867,6 @@ export class Utils {
     }
 
     /**
-     * single level clone, returning a new object with same top fields. This will share sub objects and arrays
-     *
      * 浅克隆对象，创建原始对象的一级复制。
      *
      * 此方法创建一个新对象，其中包含原始对象的所有顶级属性。
@@ -946,9 +895,6 @@ export class Utils {
     }
 
     /**
-     * Recursive clone version that returns a full copy, checking for nested objects and arrays ONLY.
-     * Note: this will use as-is any key starting with double __ (and not copy inside) some lib have circular dependencies.
-     *
      * 创建对象的深度克隆。
      *
      * 此方法对输入对象执行深度复制，递归地克隆嵌套对象。
@@ -979,8 +925,6 @@ export class Utils {
     }
 
     /**
-     * deep clone the given HTML node, removing the unique id field
-     *
      * 深度克隆给定的HTML节点，同时移除唯一ID字段
      *
      * @param el - 要克隆的HTML元素
@@ -1002,8 +946,6 @@ export class Utils {
     }
 
     /**
-     * append element to parent
-     *
      * 将元素附加到父元素
      *
      * @param el - 要附加的HTML元素
@@ -1030,8 +972,6 @@ export class Utils {
     }
 
     /**
-     * add styles to element
-     *
      * 向HTML元素添加样式
      *
      * @param el - 要应用样式的HTML元素
@@ -1077,8 +1017,6 @@ export class Utils {
     }
 
     /**
-     * initialize event with properties from existing event
-     *
      * 使用现有事件的属性初始化一个新事件对象
      *
      * @param e - 源事件对象(DragEvent或MouseEvent)
@@ -1112,8 +1050,6 @@ export class Utils {
     }
 
     /**
-     * copies the MouseEvent (or convert Touch) properties and sends it as another event to the given target
-     *
      * 通过创建并分发指定类型的新MouseEvent来模拟鼠标事件。
      *
      * @param e - 用作模拟事件模板的原始MouseEvent或Touch对象
@@ -1153,8 +1089,6 @@ export class Utils {
     }
 
     /**
-     * defines an element that is used to get the offset and scale from grid transforms
-     * returns the scale and offsets from said element
      *
      * 计算变换后父元素的缩放和偏移值。
      *
@@ -1192,7 +1126,6 @@ export class Utils {
     }
 
     /**
-     * swap the given object 2 field values
      *
      * 交换给定对象的两个字段值
      *
@@ -1226,8 +1159,6 @@ export class Utils {
     // }
 
     /**
-     * true if the item can be rotated (checking for prop, not space available)
-     *
      * 判断一个网格节点是否可以旋转
      *
      * @param n - 要检查的网格节点

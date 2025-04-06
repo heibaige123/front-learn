@@ -176,9 +176,7 @@ export class DDDroppable extends DDBaseImplement implements HTMLElementExtendOpt
     }
 
     /**
-     * @internal called when the cursor enters our area - prepare for a possible drop and track leaving
-     *
-     *  当光标进入我们的区域时调用 - 为可能的放置做准备并跟踪离开
+     * 当光标进入我们的区域时调用 - 为可能的放置做准备并跟踪离开
      *
      * 该方法处理拖拽元素进入可放置区域的逻辑：
      * 1. 检查是否有正在拖拽的元素，如果没有则直接返回
@@ -194,30 +192,26 @@ export class DDDroppable extends DDBaseImplement implements HTMLElementExtendOpt
      * @param e - 鼠标进入事件对象
      */
     protected _mouseEnter(e: MouseEvent): void {
-        // console.log(`${count++} Enter ${this.el.id || (this.el as GridHTMLElement).gridstack.opts.id}`); // TEST
-        if (!DDManager.dragElement) return;
-        if (!this._canDrop(DDManager.dragElement.el)) return;
-        e.preventDefault();
-        e.stopPropagation();
+      if (!DDManager.dragElement) return;
+      if (!this._canDrop(DDManager.dragElement.el)) return;
+      e.preventDefault();
+      e.stopPropagation();
 
-        // make sure when we enter this, that the last one gets a leave FIRST to correctly cleanup as we don't always do
-        if (DDManager.dropElement && DDManager.dropElement !== this) {
-            DDManager.dropElement._mouseLeave(e as DragEvent, true); // calledByEnter = true
-        }
-        DDManager.dropElement = this;
+      // 确保在进入新的可放置区域前，触发之前区域的离开事件
+      if (DDManager.dropElement && DDManager.dropElement !== this) {
+        DDManager.dropElement._mouseLeave(e as DragEvent, true); // calledByEnter = true
+      }
+      DDManager.dropElement = this;
 
-        const ev = Utils.initEvent<DragEvent>(e, {target: this.el, type: 'dropover'});
-        if (this.option.over) {
-            this.option.over(ev, this._ui(DDManager.dragElement));
-        }
-        this.triggerEvent('dropover', ev);
-        this.el.classList.add('ui-droppable-over');
-        // console.log('tracking'); // TEST
+      const ev = Utils.initEvent<DragEvent>(e, {target: this.el, type: 'dropover'});
+      if (this.option.over) {
+        this.option.over(ev, this._ui(DDManager.dragElement));
+      }
+      this.triggerEvent('dropover', ev);
+      this.el.classList.add('ui-droppable-over');
     }
 
     /**
-     *  @internal called when the item is leaving our area, stop tracking if we had moving item
-     *
      * 当元素离开我们的可放置区域时调用，如果有正在跟踪的移动项目则停止跟踪
      *
      * 该方法处理拖拽元素离开可放置区域的逻辑：
@@ -267,8 +261,6 @@ export class DDDroppable extends DDBaseImplement implements HTMLElementExtendOpt
     }
 
     /**
-     * item is being dropped on us - called by the drag mouseup handler - this calls the client drop event
-     *
      * 处理拖拽元素被放置时的事件
      *
      * @param e - 鼠标事件对象
@@ -297,8 +289,6 @@ export class DDDroppable extends DDBaseImplement implements HTMLElementExtendOpt
 
     /**
      *
-     * @internal true if element matches the string/method accept option
-     *
      * 检查一个元素是否可以被放置
      * @param el - 要检查的HTML元素
      * @returns {boolean} 如果元素存在且满足accept条件则返回true，否则返回false
@@ -311,8 +301,6 @@ export class DDDroppable extends DDBaseImplement implements HTMLElementExtendOpt
     }
 
     /**
-     * @internal
-     *
      * 根据配置初始化可接受的拖拽元素条件
      *
      * 如果 option.accept 是字符串类型，会设置 accept 函数来检查元素是否:
@@ -336,8 +324,6 @@ export class DDDroppable extends DDBaseImplement implements HTMLElementExtendOpt
     }
 
     /**
-     * @internal
-     *
      * 生成UI数据对象
      *
      * @param drag - DDDraggable实例对象

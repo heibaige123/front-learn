@@ -13,10 +13,10 @@ import {
     CompactOptions
 } from './types';
 
-/** callback to update the DOM attributes since this class is generic (no HTML or other info) for items that changed - see _notify() */
+/** 更新 DOM 属性的回调函数，因为此类是通用的（没有 HTML 或其他信息），用于处理已更改的项目 - 请参阅 _notify() */
 type OnChangeCB = (nodes: GridStackNode[]) => void;
 
-/** options used during creation - similar to GridStackOptions */
+/** 创建时使用的选项 - 类似于 GridStackOptions */
 export interface GridStackEngineOptions {
     column?: number;
     maxRow?: number;
@@ -26,320 +26,359 @@ export interface GridStackEngineOptions {
 }
 
 /**
- * Defines the GridStack engine that does most no DOM grid manipulation.
- * See GridStack methods and vars for descriptions.
+ * 定义了 GridStack 引擎，该引擎负责大部分与 DOM 无关的网格操作。
+ * 请参阅 GridStack 方法和变量的描述。
  *
- * NOTE: values should not be modified directly - call the main GridStack API instead
+ * 注意：值不应直接修改 - 请调用主 GridStack API。
  */
 export class GridStackEngine {
-    public column: number;
-    public maxRow: number;
-    public nodes: GridStackNode[];
-    public addedNodes: GridStackNode[] = [];
-    public removedNodes: GridStackNode[] = [];
-    public batchMode: boolean;
-    public defaultColumn = 12;
-    /** @internal callback to update the DOM attributes */
+    public column: number; // 网格的列数
+    public maxRow: number; // 网格的最大行数
+    public nodes: GridStackNode[]; // 当前网格中的节点列表
+    public addedNodes: GridStackNode[] = []; // 新增的节点列表
+    public removedNodes: GridStackNode[] = []; // 移除的节点列表
+    public batchMode: boolean; // 是否处于批量更新模式
+    public defaultColumn = 12; // 默认的列数
+    /** @internal 更新 DOM 属性的回调函数 */
     protected onChange: OnChangeCB;
-    /** @internal */
+    /** @internal 是否启用浮动模式 */
     protected _float: boolean;
-    /** @internal */
+    /** @internal 上一次的浮动模式状态 */
     protected _prevFloat: boolean;
-    /** @internal cached layouts of difference column count so we can restore back (eg 12 -> 1 -> 12) */
-    protected _layouts?: GridStackNode[][]; // maps column # to array of values nodes
-    /** @internal set during loading (which is sorted) so item gets added AFTER collision nodes */
+    /** @internal 缓存不同列数的布局，以便可以恢复（例如 12 -> 1 -> 12） */
+    protected _layouts?: GridStackNode[][]; // 映射列数到节点数组
+    /** @internal 在加载期间设置（已排序），以便在碰撞节点之后添加项目 */
     public _loading?: boolean;
-    /** @internal true while we are resizing widgets during column resize to skip certain parts */
+    /** @internal 在列调整大小期间用于跳过某些部分的标志 */
     protected _inColumnResize?: boolean;
-    /** true when grid.load() already cached the layout and can skip out of bound caching info */
+    /** 如果为 true，则在 grid.load() 已缓存布局时可以跳过越界缓存信息 */
     public skipCacheUpdate?: boolean;
-    /** @internal true if we have some items locked */
+    /** @internal 如果有一些项目被锁定，则为 true */
     protected _hasLocked: boolean;
-    /** @internal unique global internal _id counter */
+    /** @internal 唯一的全局内部 _id 计数器 */
     public static _idSeq = 0;
 
+    /**
+     * 构造函数，用于初始化 GridStackEngine 实例
+     * @param opts 配置选项
+     */
     public constructor(opts: GridStackEngineOptions = {}) {
-        this.column = opts.column || this.defaultColumn;
-        if (this.column > this.defaultColumn) this.defaultColumn = this.column;
-        this.maxRow = opts.maxRow;
-        this._float = opts.float;
-        this.nodes = opts.nodes || [];
-        this.onChange = opts.onChange;
+        this.column = opts.column || this.defaultColumn; // 设置网格的列数，默认为 defaultColumn
+        if (this.column > this.defaultColumn) this.defaultColumn = this.column; // 如果列数大于默认值，则更新默认列数
+        this.maxRow = opts.maxRow; // 设置网格的最大行数
+        this._float = opts.float; // 是否启用浮动模式
+        this.nodes = opts.nodes || []; // 初始化节点列表
+        this.onChange = opts.onChange; // 设置节点更改的回调函数
     }
 
+    /**
+     * 批量更新模式的开启和关闭
+     * @param flag 是否开启批量更新模式，默认为 true
+     * @param doPack 是否在关闭批量更新模式时重新整理节点，默认为 true
+     * @returns 当前的 GridStackEngine 实例
+     */
     public batchUpdate(flag = true, doPack = true): GridStackEngine {
+        // 如果当前模式已经是目标模式，则直接返回
         if (!!this.batchMode === flag) return this;
-        this.batchMode = flag;
+
+        this.batchMode = flag; // 设置批量更新模式的状态
+
         if (flag) {
-            this._prevFloat = this._float;
-            this._float = true; // let things go anywhere for now... will restore and possibly reposition later
-            this.cleanNodes();
-            this.saveInitial(); // since begin update (which is called multiple times) won't do this
+            // 开启批量更新模式
+            this._prevFloat = this._float; // 保存当前浮动模式状态
+            this._float = true; // 暂时允许节点自由移动
+            this.cleanNodes(); // 清理节点的脏状态
+            this.saveInitial(); // 保存初始状态，便于后续检测更改
         } else {
-            this._float = this._prevFloat;
-            delete this._prevFloat;
-            if (doPack) this._packNodes();
-            this._notify();
+            // 关闭批量更新模式
+            this._float = this._prevFloat; // 恢复之前的浮动模式状态
+            delete this._prevFloat; // 删除临时保存的浮动模式状态
+            if (doPack) this._packNodes(); // 如果需要，重新整理节点
+            this._notify(); // 通知更改
         }
-        return this;
+
+        return this; // 返回当前实例
     }
 
-    // use entire row for hitting area (will use bottom reverse sorted first) if we not actively moving DOWN and didn't already skip
+    /**
+     * 判断是否使用整行作为碰撞检测区域
+     * @param node 当前节点
+     * @param nn 新位置
+     * @returns 如果满足条件，返回 true，否则返回 false
+     */
     protected _useEntireRowArea(node: GridStackNode, nn: GridStackPosition): boolean {
         return (
-            (!this.float || (this.batchMode && !this._prevFloat)) &&
-            !this._hasLocked &&
-            (!node._moving || node._skipDown || nn.y <= node.y)
+            (!this.float || (this.batchMode && !this._prevFloat)) && // 如果未启用浮动模式，或者处于批量模式且之前未启用浮动模式
+            !this._hasLocked && // 如果没有锁定的节点
+            (!node._moving || node._skipDown || nn.y <= node.y) // 如果节点未移动，或者跳过向下移动，或者新位置的 y 值不大于当前节点的 y 值
         );
     }
 
-    /** @internal fix collision on given 'node', going to given new location 'nn', with optional 'collide' node already found.
-     * return true if we moved. */
+    /** @internal 修复给定节点 'node' 的碰撞问题，将其移动到新位置 'nn'，并可选地提供已找到的 'collide' 节点。
+     * 如果移动了节点，则返回 true。 */
     protected _fixCollisions(
-        node: GridStackNode,
-        nn = node,
-        collide?: GridStackNode,
-        opt: GridStackMoveOpts = {}
+      node: GridStackNode,
+      nn = node,
+      collide?: GridStackNode,
+      opt: GridStackMoveOpts = {}
     ): boolean {
-        this.sortNodes(-1); // from last to first, so recursive collision move items in the right order
+      this.sortNodes(-1); // 从最后一个节点到第一个节点排序，以便递归碰撞时按正确顺序移动项目
 
-        collide = collide || this.collide(node, nn); // REAL area collide for swap and skip if none...
-        if (!collide) return false;
+      collide = collide || this.collide(node, nn); // 实际区域碰撞检测，用于交换和跳过无碰撞的情况
+      if (!collide) return false;
 
-        // swap check: if we're actively moving in gravity mode, see if we collide with an object the same size
-        if (node._moving && !opt.nested && !this.float) {
-            if (this.swap(node, collide)) return true;
+      // 检查交换：如果我们在重力模式下主动移动，检查是否与大小相同的对象碰撞
+      if (node._moving && !opt.nested && !this.float) {
+        if (this.swap(node, collide)) return true;
+      }
+
+      // 在 while() 碰撞期间，确保检查整行，以防较大的项目跳过较小的项目（从网格中的最后一个项目开始向下推）
+      let area = nn;
+      if (!this._loading && this._useEntireRowArea(node, nn)) {
+        area = {x: 0, w: this.column, y: nn.y, h: nn.h};
+        collide = this.collide(node, area, opt.skip); // 强制重新检测碰撞
+      }
+
+      let didMove = false;
+      const newOpt: GridStackMoveOpts = {nested: true, pack: false};
+      let counter = 0;
+      while ((collide = collide || this.collide(node, area, opt.skip))) {
+        // 可能与多个项目碰撞，因此需要对每个项目重复处理
+        if (counter++ > this.nodes.length * 2) {
+          throw new Error('无限碰撞检测');
+        }
+        let moved: boolean;
+        // 如果与锁定的项目碰撞，或者正在加载（移动到后面），或者在顶部重力模式下向下移动（并且碰撞的项目可以向上移动）-> 跳过碰撞项目，
+        // 但记住跳过向下移动，以便仅执行一次（并推动其他项目）。
+        if (
+          collide.locked ||
+          this._loading ||
+          (node._moving &&
+            !node._skipDown &&
+            nn.y > node.y &&
+            !this.float &&
+            // 可以占用我们之前的位置，或者在我们将要去的位置之前
+            (!this.collide(collide, {...collide, y: node.y}, node) ||
+              !this.collide(collide, {...collide, y: nn.y - collide.h}, node)))
+        ) {
+          node._skipDown = node._skipDown || nn.y > node.y;
+          const newNN = {...nn, y: collide.y + collide.h, ...newOpt};
+          // 假装我们移动到了当前位置，以便继续进行任何碰撞检查 #2492
+          moved =
+            this._loading && Utils.samePos(node, newNN) ? true : this.moveNode(node, newNN);
+
+          if ((collide.locked || this._loading) && moved) {
+            Utils.copyPos(nn, node); // 移动到锁定项目之后成为我们新的目标位置
+          } else if (!collide.locked && moved && opt.pack) {
+            // 如果我们移动到了后面并将进行整理：立即执行整理并保持原始放置位置，但超出旧的碰撞位置以查看我们可能推动了什么
+            this._packNodes();
+            nn.y = collide.y + collide.h;
+            Utils.copyPos(node, nn);
+          }
+          didMove = didMove || moved;
+        } else {
+          // 将碰撞项目向下移动到我们将要去的位置之后，忽略我们现在的位置（不要与我们自己碰撞）
+          moved = this.moveNode(collide, {...collide, y: nn.y + nn.h, skip: node, ...newOpt});
         }
 
-        // during while() collisions MAKE SURE to check entire row so larger items don't leap frog small ones (push them all down starting last in grid)
-        let area = nn;
-        if (!this._loading && this._useEntireRowArea(node, nn)) {
-            area = {x: 0, w: this.column, y: nn.y, h: nn.h};
-            collide = this.collide(node, area, opt.skip); // force new hit
-        }
+        if (!moved) return didMove; // 如果无法移动，则中断无限循环（例如：maxRow、固定位置）
 
-        let didMove = false;
-        const newOpt: GridStackMoveOpts = {nested: true, pack: false};
-        let counter = 0;
-        while ((collide = collide || this.collide(node, area, opt.skip))) {
-            // could collide with more than 1 item... so repeat for each
-            if (counter++ > this.nodes.length * 2) {
-                throw new Error('Infinite collide check');
-            }
-            let moved: boolean;
-            // if colliding with a locked item OR loading (move after) OR moving down with top gravity (and collide could move up) -> skip past the collide,
-            // but remember that skip down so we only do this once (and push others otherwise).
-            if (
-                collide.locked ||
-                this._loading ||
-                (node._moving &&
-                    !node._skipDown &&
-                    nn.y > node.y &&
-                    !this.float &&
-                    // can take space we had, or before where we're going
-                    (!this.collide(collide, {...collide, y: node.y}, node) ||
-                        !this.collide(collide, {...collide, y: nn.y - collide.h}, node)))
-            ) {
-                node._skipDown = node._skipDown || nn.y > node.y;
-                const newNN = {...nn, y: collide.y + collide.h, ...newOpt};
-                // pretent we moved to where we are now so we can continue any collision checks #2492
-                moved =
-                    this._loading && Utils.samePos(node, newNN) ? true : this.moveNode(node, newNN);
-
-                if ((collide.locked || this._loading) && moved) {
-                    Utils.copyPos(nn, node); // moving after lock become our new desired location
-                } else if (!collide.locked && moved && opt.pack) {
-                    // we moved after and will pack: do it now and keep the original drop location, but past the old collide to see what else we might push way
-                    this._packNodes();
-                    nn.y = collide.y + collide.h;
-                    Utils.copyPos(node, nn);
-                }
-                didMove = didMove || moved;
-            } else {
-                // move collide down *after* where we will be, ignoring where we are now (don't collide with us)
-                moved = this.moveNode(collide, {...collide, y: nn.y + nn.h, skip: node, ...newOpt});
-            }
-
-            if (!moved) return didMove; // break inf loop if we couldn't move after all (ex: maxRow, fixed)
-
-            collide = undefined;
-        }
-        return didMove;
+        collide = undefined;
+      }
+      return didMove;
     }
 
-    /** return the nodes that intercept the given node. Optionally a different area can be used, as well as a second node to skip */
+    /**
+     * 返回与给定节点相交的节点。可以选择使用不同的区域进行检测，并且可以跳过第二个节点。
+     * @param skip 要跳过的节点
+     * @param area 用于检测的区域，默认为 skip 节点的区域
+     * @param skip2 要跳过的第二个节点（可选）
+     * @returns 如果找到相交的节点，则返回该节点；否则返回 undefined
+     */
     public collide(
-        skip: GridStackNode,
-        area = skip,
-        skip2?: GridStackNode
+      skip: GridStackNode,
+      area = skip,
+      skip2?: GridStackNode
     ): GridStackNode | undefined {
-        const skipId = skip._id;
-        const skip2Id = skip2?._id;
-        return this.nodes.find(
-            (n) => n._id !== skipId && n._id !== skip2Id && Utils.isIntercepted(n, area)
-        );
+      const skipId = skip._id; // 跳过的节点 ID
+      const skip2Id = skip2?._id; // 跳过的第二个节点 ID（如果存在）
+      return this.nodes.find(
+        (n) => n._id !== skipId && n._id !== skip2Id && Utils.isIntercepted(n, area)
+      );
     }
+    /**
+     * 返回与给定节点相交的所有节点。可以选择使用不同的区域进行检测，并且可以跳过第二个节点。
+     * @param skip 要跳过的节点
+     * @param area 用于检测的区域，默认为 skip 节点的区域
+     * @param skip2 要跳过的第二个节点（可选）
+     * @returns 返回与给定区域相交的所有节点
+     */
     public collideAll(skip: GridStackNode, area = skip, skip2?: GridStackNode): GridStackNode[] {
-        const skipId = skip._id;
-        const skip2Id = skip2?._id;
-        return this.nodes.filter(
-            (n) => n._id !== skipId && n._id !== skip2Id && Utils.isIntercepted(n, area)
-        );
+      const skipId = skip._id; // 跳过的节点 ID
+      const skip2Id = skip2?._id; // 跳过的第二个节点 ID（如果存在）
+      return this.nodes.filter(
+        (n) => n._id !== skipId && n._id !== skip2Id && Utils.isIntercepted(n, area)
+      );
     }
 
-    /** does a pixel coverage collision based on where we started, returning the node that has the most coverage that is >50% mid line */
+    /** 基于像素覆盖的碰撞检测，返回覆盖率超过 50% 的节点 */
     protected directionCollideCoverage(
-        node: GridStackNode,
-        o: GridStackMoveOpts,
-        collides: GridStackNode[]
+      node: GridStackNode,
+      o: GridStackMoveOpts,
+      collides: GridStackNode[]
     ): GridStackNode | undefined {
-        if (!o.rect || !node._rect) return;
-        const r0 = node._rect; // where started
-        const r = {...o.rect}; // where we are
+      if (!o.rect || !node._rect) return;
+      const r0 = node._rect; // 起始位置
+      const r = {...o.rect}; // 当前拖动位置
 
-        // update dragged rect to show where it's coming from (above or below, etc...)
-        if (r.y > r0.y) {
-            r.h += r.y - r0.y;
-            r.y = r0.y;
-        } else {
-            r.h += r0.y - r.y;
-        }
-        if (r.x > r0.x) {
-            r.w += r.x - r0.x;
-            r.x = r0.x;
-        } else {
-            r.w += r0.x - r.x;
-        }
+      // 更新拖动矩形以显示其来源方向（上方、下方等）
+      if (r.y > r0.y) {
+        r.h += r.y - r0.y;
+        r.y = r0.y;
+      } else {
+        r.h += r0.y - r.y;
+      }
+      if (r.x > r0.x) {
+        r.w += r.x - r0.x;
+        r.x = r0.x;
+      } else {
+        r.w += r0.x - r.x;
+      }
 
-        let collide: GridStackNode;
-        let overMax = 0.5; // need >50%
-        for (let n of collides) {
-            if (n.locked || !n._rect) {
-                break;
-            }
-            const r2 = n._rect; // overlapping target
-            let yOver = Number.MAX_VALUE,
-                xOver = Number.MAX_VALUE;
-            // depending on which side we started from, compute the overlap % of coverage
-            // (ex: from above/below we only compute the max horizontal line coverage)
-            if (r0.y < r2.y) {
-                // from above
-                yOver = (r.y + r.h - r2.y) / r2.h;
-            } else if (r0.y + r0.h > r2.y + r2.h) {
-                // from below
-                yOver = (r2.y + r2.h - r.y) / r2.h;
-            }
-            if (r0.x < r2.x) {
-                // from the left
-                xOver = (r.x + r.w - r2.x) / r2.w;
-            } else if (r0.x + r0.w > r2.x + r2.w) {
-                // from the right
-                xOver = (r2.x + r2.w - r.x) / r2.w;
-            }
-            const over = Math.min(xOver, yOver);
-            if (over > overMax) {
-                overMax = over;
-                collide = n;
-            }
+      let collide: GridStackNode;
+      let overMax = 0.5; // 需要超过 50% 的覆盖率
+      for (let n of collides) {
+        if (n.locked || !n._rect) {
+          break;
         }
-        o.collide = collide; // save it so we don't have to find it again
-        return collide;
+        const r2 = n._rect; // 重叠目标
+        let yOver = Number.MAX_VALUE,
+          xOver = Number.MAX_VALUE;
+        // 根据起始方向计算覆盖率百分比
+        // （例如：从上方/下方仅计算最大水平线覆盖率）
+        if (r0.y < r2.y) {
+          // 从上方
+          yOver = (r.y + r.h - r2.y) / r2.h;
+        } else if (r0.y + r0.h > r2.y + r2.h) {
+          // 从下方
+          yOver = (r2.y + r2.h - r.y) / r2.h;
+        }
+        if (r0.x < r2.x) {
+          // 从左侧
+          xOver = (r.x + r.w - r2.x) / r2.w;
+        } else if (r0.x + r0.w > r2.x + r2.w) {
+          // 从右侧
+          xOver = (r2.x + r2.w - r.x) / r2.w;
+        }
+        const over = Math.min(xOver, yOver);
+        if (over > overMax) {
+          overMax = over;
+          collide = n;
+        }
+      }
+      o.collide = collide; // 保存结果以避免重复查找
+      return collide;
     }
 
-    /** does a pixel coverage returning the node that has the most coverage by area */
+    /** 通过像素覆盖返回覆盖面积最大的节点 */
     /*
-  protected collideCoverage(r: GridStackPosition, collides: GridStackNode[]): {collide: GridStackNode, over: number} {
+    protected collideCoverage(r: GridStackPosition, collides: GridStackNode[]): {collide: GridStackNode, over: number} {
     const collide: GridStackNode;
     const overMax = 0;
     collides.forEach(n => {
       if (n.locked || !n._rect) return;
       const over = Utils.areaIntercept(r, n._rect);
       if (over > overMax) {
-        overMax = over;
-        collide = n;
+      overMax = over;
+      collide = n;
       }
     });
     return {collide, over: overMax};
-  }
-  */
+    }
+    */
 
-    /** called to cache the nodes pixel rectangles used for collision detection during drag */
+    /** 用于缓存节点的像素矩形，在拖动期间用于碰撞检测 */
     public cacheRects(
-        w: number,
-        h: number,
-        top: number,
-        right: number,
-        bottom: number,
-        left: number
+      w: number,
+      h: number,
+      top: number,
+      right: number,
+      bottom: number,
+      left: number
     ): GridStackEngine {
-        this.nodes.forEach(
-            (n) =>
-                (n._rect = {
-                    y: n.y * h + top,
-                    x: n.x * w + left,
-                    w: n.w * w - left - right,
-                    h: n.h * h - top - bottom
-                })
-        );
-        return this;
+      this.nodes.forEach(
+        (n) =>
+          (n._rect = {
+            y: n.y * h + top, // 计算矩形的顶部位置
+            x: n.x * w + left, // 计算矩形的左侧位置
+            w: n.w * w - left - right, // 计算矩形的宽度
+            h: n.h * h - top - bottom // 计算矩形的高度
+          })
+      );
+      return this;
     }
 
-    /** called to possibly swap between 2 nodes (same size or column, not locked, touching), returning true if successful */
+    /**
+     * 尝试在两个节点之间进行交换（相同大小或列，不锁定，接触），如果成功返回 true
+     * @param a 第一个节点
+     * @param b 第二个节点
+     * @returns 如果交换成功返回 true，否则返回 false 或 undefined
+     */
     public swap(a: GridStackNode, b: GridStackNode): boolean | undefined {
-        if (!b || b.locked || !a || a.locked) return false;
+      if (!b || b.locked || !a || a.locked) return false;
 
-        function _doSwap(): true {
-            // assumes a is before b IFF they have different height (put after rather than exact swap)
-            const x = b.x,
-                y = b.y;
-            b.x = a.x;
-            b.y = a.y; // b -> a position
-            if (a.h != b.h) {
-                a.x = x;
-                a.y = b.y + b.h; // a -> goes after b
-            } else if (a.w != b.w) {
-                a.x = b.x + b.w;
-                a.y = y; // a -> goes after b
-            } else {
-                a.x = x;
-                a.y = y; // a -> old b position
-            }
-            a._dirty = b._dirty = true;
-            return true;
+      function _doSwap(): true {
+        // 假设 a 在 b 之前 IFF 它们具有不同的高度（放在 b 之后而不是完全交换）
+        const x = b.x,
+          y = b.y;
+        b.x = a.x;
+        b.y = a.y; // b -> 移动到 a 的位置
+        if (a.h != b.h) {
+          a.x = x;
+          a.y = b.y + b.h; // a -> 移动到 b 的后面
+        } else if (a.w != b.w) {
+          a.x = b.x + b.w;
+          a.y = y; // a -> 移动到 b 的后面
+        } else {
+          a.x = x;
+          a.y = y; // a -> 移动到 b 的旧位置
         }
-        let touching: boolean; // remember if we called it (vs undefined)
+        a._dirty = b._dirty = true;
+        return true;
+      }
+      let touching: boolean; // 记录是否调用了接触检测（vs undefined）
 
-        // same size and same row or column, and touching
-        if (
-            a.w === b.w &&
-            a.h === b.h &&
-            (a.x === b.x || a.y === b.y) &&
-            (touching = Utils.isTouching(a, b))
-        )
-            return _doSwap();
-        if (touching === false) return; // IFF ran test and fail, bail out
+      // 如果大小相同并且在同一行或列上，并且接触
+      if (
+        a.w === b.w &&
+        a.h === b.h &&
+        (a.x === b.x || a.y === b.y) &&
+        (touching = Utils.isTouching(a, b))
+      )
+        return _doSwap();
+      if (touching === false) return; // 如果检测失败，直接返回
 
-        // check for taking same columns (but different height) and touching
-        if (a.w === b.w && a.x === b.x && (touching || (touching = Utils.isTouching(a, b)))) {
-            if (b.y < a.y) {
-                const t = a;
-                a = b;
-                b = t;
-            } // swap a <-> b vars so a is first
-            return _doSwap();
-        }
-        if (touching === false) return;
+      // 检查是否占用相同的列（但高度不同）并且接触
+      if (a.w === b.w && a.x === b.x && (touching || (touching = Utils.isTouching(a, b)))) {
+        if (b.y < a.y) {
+          const t = a;
+          a = b;
+          b = t;
+        } // 交换 a 和 b 的变量，使 a 在前
+        return _doSwap();
+      }
+      if (touching === false) return;
 
-        // check if taking same row (but different width) and touching
-        if (a.h === b.h && a.y === b.y && (touching || (touching = Utils.isTouching(a, b)))) {
-            if (b.x < a.x) {
-                const t = a;
-                a = b;
-                b = t;
-            } // swap a <-> b vars so a is first
-            return _doSwap();
-        }
-        return false;
+      // 检查是否占用相同的行（但宽度不同）并且接触
+      if (a.h === b.h && a.y === b.y && (touching || (touching = Utils.isTouching(a, b)))) {
+        if (b.x < a.x) {
+          const t = a;
+          a = b;
+          b = t;
+        } // 交换 a 和 b 的变量，使 a 在前
+        return _doSwap();
+      }
+      return false;
     }
 
     public isAreaEmpty(x: number, y: number, w: number, h: number): boolean {
@@ -1104,67 +1143,80 @@ export class GridStackEngine {
     }
 
     /**
-     * call to cache the given layout internally to the given location so we can restore back when column changes size
-     * @param nodes list of nodes
-     * @param column corresponding column index to save it under
-     * @param clear if true, will force other caches to be removed (default false)
+     * 将给定的布局缓存到指定列索引的位置，以便在列大小更改时可以恢复
+     * @param nodes 节点列表
+     * @param column 对应的列索引
+     * @param clear 如果为 true，将强制清除其他缓存（默认为 false）
      */
     public cacheLayout(nodes: GridStackNode[], column: number, clear = false): GridStackEngine {
         const copy: GridStackNode[] = [];
         nodes.forEach((n, i) => {
-            // make sure we have an id in case this is new layout, else re-use id already set
+            // 确保我们有一个 id，以防这是新的布局，否则重用已设置的 id
             if (n._id === undefined) {
-                const existing = n.id ? this.nodes.find((n2) => n2.id === n.id) : undefined; // find existing node using users id
+                const existing = n.id ? this.nodes.find((n2) => n2.id === n.id) : undefined; // 使用用户的 id 查找现有节点
                 n._id = existing?._id ?? GridStackEngine._idSeq++;
             }
-            copy[i] = {x: n.x, y: n.y, w: n.w, _id: n._id}; // only thing we change is x,y,w and id to find it back
+            copy[i] = {x: n.x, y: n.y, w: n.w, _id: n._id}; // 仅更改 x, y, w 和 id 以便后续查找
         });
-        this._layouts = clear ? [] : this._layouts || []; // use array to find larger quick
+        this._layouts = clear ? [] : this._layouts || []; // 使用数组快速查找更大的布局
         this._layouts[column] = copy;
         return this;
     }
 
     /**
-     * call to cache the given node layout internally to the given location so we can restore back when column changes size
-     * @param node single node to cache
-     * @param column corresponding column index to save it under
+     * 将单个节点的布局缓存到指定列索引的位置，以便在列大小更改时可以恢复
+     * @param node 要缓存的单个节点
+     * @param column 对应的列索引
      */
-    public cacheOneLayout(n: GridStackNode, column: number): GridStackEngine {
-        n._id = n._id ?? GridStackEngine._idSeq++;
-        const l: GridStackNode = {x: n.x, y: n.y, w: n.w, _id: n._id};
-        if (n.autoPosition || n.x === undefined) {
-            delete l.x;
-            delete l.y;
-            if (n.autoPosition) l.autoPosition = true;
+    public cacheOneLayout(node: GridStackNode, column: number): GridStackEngine {
+        node._id = node._id ?? GridStackEngine._idSeq++;
+        const layoutNode: GridStackNode = {x: node.x, y: node.y, w: node.w, _id: node._id};
+        if (node.autoPosition || node.x === undefined) {
+            delete layoutNode.x;
+            delete layoutNode.y;
+            if (node.autoPosition) layoutNode.autoPosition = true;
         }
         this._layouts = this._layouts || [];
         this._layouts[column] = this._layouts[column] || [];
-        const index = this.findCacheLayout(n, column);
-        if (index === -1) this._layouts[column].push(l);
-        else this._layouts[column][index] = l;
+        const index = this.findCacheLayout(node, column);
+        if (index === -1) {
+            this._layouts[column].push(layoutNode);
+        } else {
+            this._layouts[column][index] = layoutNode;
+        }
         return this;
     }
 
-    protected findCacheLayout(n: GridStackNode, column: number): number | undefined {
+    /**
+     * 在布局缓存中查找指定节点的位置
+     * @param n 要查找的节点
+     * @param column 对应的列索引
+     * @returns 节点在布局缓存中的索引，如果未找到则返回 -1
+     */
+    protected findCacheLayout(n: GridStackNode, column: number): number {
         return this._layouts?.[column]?.findIndex((l) => l._id === n._id) ?? -1;
     }
 
-    public removeNodeFromLayoutCache(n: GridStackNode) {
-        if (!this._layouts) {
-            return;
-        }
-        for (let i = 0; i < this._layouts.length; i++) {
+    /**
+     * 从布局缓存中移除指定节点
+     * @param n 要移除的节点
+     */
+    public removeNodeFromLayoutCache(n: GridStackNode): void {
+        if (!this._layouts) return;
+        this._layouts.forEach((layout, i) => {
             const index = this.findCacheLayout(n, i);
             if (index !== -1) {
-                this._layouts[i].splice(index, 1);
+                layout.splice(index, 1);
             }
-        }
+        });
     }
 
-    /** called to remove all internal values but the _id */
+    /** 清理节点的所有内部值，仅保留 _id */
     public cleanupNode(node: GridStackNode): GridStackEngine {
         for (const prop in node) {
-            if (prop[0] === '_' && prop !== '_id') delete node[prop];
+            if (prop.startsWith('_') && prop !== '_id') {
+                delete node[prop];
+            }
         }
         return this;
     }
