@@ -1,0 +1,26 @@
+{
+    "settings": {
+        "mcp.server": "mcp-server-time",
+        "mcp.server.timezone": "America/Los_Angeles"
+    },
+    "extensions": {
+    },
+    "folders": [
+        {
+            "path": "../packages/single-packages/gridstackjs",
+            "name": "gridstackjs"
+        },
+        {
+            "path": "../packages/single-packages/ms",
+            "name": "ms"
+        },
+        {
+            "path": "../packages/single-packages/ttlcache",
+            "name": "ttlcache"
+        },
+        {
+            "path": "../packages/single-packages/node-lru-cache",
+            "name": "node-lru-cache"
+        }
+    ],
+}
