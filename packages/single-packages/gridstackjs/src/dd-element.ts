@@ -3,10 +3,10 @@
  * Copyright (c) 2021-2024 Alain Dumesny - see GridStack root license
  */
 
-import { DDResizable, DDResizableOpt } from './dd-resizable';
-import { DDDragOpt, GridItemHTMLElement } from './types';
-import { DDDraggable } from './dd-draggable';
-import { DDDroppable, DDDroppableOpt } from './dd-droppable';
+import {DDResizable, DDResizableOpt} from './dd-resizable';
+import {DDDragOpt, GridItemHTMLElement} from './types';
+import {DDDraggable} from './dd-draggable';
+import {DDDroppable, DDDroppableOpt} from './dd-droppable';
 
 /** DDElement 宿主元素接口，继承自 GridItemHTMLElement */
 export interface DDElementHost extends GridItemHTMLElement {
@@ -24,7 +24,7 @@ export class DDElement {
    * @returns DDElement 实例
    */
   static init(el: DDElementHost): DDElement {
-    if (!el.ddElement) { el.ddElement = new DDElement(el); }
+    if (!el.ddElement) {el.ddElement = new DDElement(el);}
     return el.ddElement;
   }
 

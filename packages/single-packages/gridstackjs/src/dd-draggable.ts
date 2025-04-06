@@ -52,7 +52,8 @@ type DDDragEvent = 'drag' | 'dragstart' | 'dragstop';
  *
  * 当用户在这些元素上点击时，不会触发拖拽操作
  */
-const skipMouseDown = 'input,textarea,button,select,option,[contenteditable="true"],.ui-resizable-handle';
+const skipMouseDown =
+    'input,textarea,button,select,option,[contenteditable="true"],.ui-resizable-handle';
 
 // let count = 0; // TEST
 
@@ -86,21 +87,21 @@ const skipMouseDown = 'input,textarea,button,select,option,[contenteditable="tru
  * - stop: 拖拽结束回调
  */
 export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt<DDDragOpt> {
-  /**
+    /**
      * HTML元素辅助器，由GridStackDDNative内部使用
      * @type {HTMLElement}
      */
-  public helper: HTMLElement; // used by GridStackDDNative
+    public helper: HTMLElement; // used by GridStackDDNative
 
-  /**
+    /**
      * @internal
      *
      * 存储最近一次的鼠标按下事件。
      * 当用户在元素上按下鼠标按键时被设置，用于跟踪拖拽操作的起始点。
      */
-  protected mouseDownEvent: MouseEvent;
+    protected mouseDownEvent: MouseEvent;
 
-  /**
+    /**
      * @internal
      *
      * 拖拽过程中用于存储偏移量的对象。
@@ -108,52 +109,64 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * - 包括相对于X轴和Y轴的位置偏移值
      * - 包括初始拖拽点相对于目标元素的偏移位置
      */
-  protected dragOffset: DragOffset;
+    protected dragOffset: DragOffset;
 
-  /**
+    /**
      * @internal 拖拽元素原始样式的存储数组
      *  */
-  protected dragElementOriginStyle: Array<string>;
+    protected dragElementOriginStyle: Array<string>;
 
-  /**
+    /**
      * @internal 要拖拽的HTML元素数组
      * */
-  protected dragEls: HTMLElement[];
+    protected dragEls: HTMLElement[];
 
-  /**
+    /**
      *  @internal 当我们正在拖动项目时为true */
-  protected dragging: boolean;
+    protected dragging: boolean;
 
-  /**
+    /**
      *  @internal 最后一次拖拽事件
      *  */
-  protected lastDrag: DragEvent;
+    protected lastDrag: DragEvent;
 
-  /**
+    /**
      * @internal 父元素原始样式位置
      * */
-  protected parentOriginStylePosition: string;
+    protected parentOriginStylePosition: string;
 
-  /**
+    /**
      *  @internal 助手元素的容器
      * */
-  protected helperContainment: HTMLElement;
+    protected helperContainment: HTMLElement;
 
-  /**
+    /**
      * @internal 拖拽过程中更改并在之后恢复的属性
      * */
-  protected static originStyleProp = ['width', 'height', 'transform', 'transform-origin', 'transition', 'pointerEvents', 'position', 'left', 'top', 'minWidth', 'willChange'];
+    protected static originStyleProp = [
+        'width',
+        'height',
+        'transform',
+        'transform-origin',
+        'transition',
+        'pointerEvents',
+        'position',
+        'left',
+        'top',
+        'minWidth',
+        'willChange'
+    ];
 
-  /**
+    /**
      * @internal pause before we call the actual drag hit collision code
      * 用于存储拖拽操作的超时计时器ID
      * 在拖拽事件处理过程中用于控制时间延迟
      * @type {number}
      * @protected
      */
-  protected dragTimeout: number;
+    protected dragTimeout: number;
 
-  /**
+    /**
      * @internal
      *
      * 拖拽变换参数对象，用于控制拖拽元素的缩放和偏移
@@ -162,14 +175,14 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * @property {number} xOffset - X轴偏移量(像素)
      * @property {number} yOffset - Y轴偏移量(像素)
      */
-  protected dragTransform: DragTransform = {
-    xScale: 1,
-    yScale: 1,
-    xOffset: 0,
-    yOffset: 0
-  };
+    protected dragTransform: DragTransform = {
+        xScale: 1,
+        yScale: 1,
+        xOffset: 0,
+        yOffset: 0
+    };
 
-  /**
+    /**
      * 创建一个新的拖拽实例
      * @param el 需要拖拽的网格项HTML元素
      * @param option 拖拽选项配置对象
@@ -188,25 +201,30 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * });
      * ```
      */
-  constructor(public el: GridItemHTMLElement, public option: DDDragOpt = {}) {
-    super();
+    constructor(public el: GridItemHTMLElement, public option: DDDragOpt = {}) {
+        super();
 
-    // get the element that is actually supposed to be dragged by
-    const handleName = option?.handle?.substring(1);
-    const n = el.gridstackNode;
-    this.dragEls = !handleName || el.classList.contains(handleName) ? [el] : (n?.subGrid ? [el.querySelector(option.handle) || el] : Array.from(el.querySelectorAll(option.handle)));
-    if (this.dragEls.length === 0) {
-      this.dragEls = [el];
+        // get the element that is actually supposed to be dragged by
+        const handleName = option?.handle?.substring(1);
+        const n = el.gridstackNode;
+        this.dragEls =
+            !handleName || el.classList.contains(handleName)
+                ? [el]
+                : n?.subGrid
+                ? [el.querySelector(option.handle) || el]
+                : Array.from(el.querySelectorAll(option.handle));
+        if (this.dragEls.length === 0) {
+            this.dragEls = [el];
+        }
+        // create var event binding so we can easily remove and still look like TS methods (unlike anonymous functions)
+        this._mouseDown = this._mouseDown.bind(this);
+        this._mouseMove = this._mouseMove.bind(this);
+        this._mouseUp = this._mouseUp.bind(this);
+        this._keyEvent = this._keyEvent.bind(this);
+        this.enable();
     }
-    // create var event binding so we can easily remove and still look like TS methods (unlike anonymous functions)
-    this._mouseDown = this._mouseDown.bind(this);
-    this._mouseMove = this._mouseMove.bind(this);
-    this._mouseUp = this._mouseUp.bind(this);
-    this._keyEvent = this._keyEvent.bind(this);
-    this.enable();
-  }
 
-  /**
+    /**
      * 为拖拽事件绑定回调函数
      * @param event - 拖拽事件类型，如 'dragstart'、'drag'、'dragend' 等
      * @param callback - 拖拽事件触发时要执行的回调函数
@@ -214,11 +232,11 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * @fires DDDragEvent 当拖拽事件发生时触发
      * @inheritdoc 继承自父类的事件监听方法
      */
-  public on(event: DDDragEvent, callback: (event: DragEvent) => void): void {
-    super.on(event, callback);
-  }
+    public on(event: DDDragEvent, callback: (event: DragEvent) => void): void {
+        super.on(event, callback);
+    }
 
-  /**
+    /**
      * 取消注册事件监听器
      *
      * @param event - 要取消注册的拖拽事件
@@ -230,11 +248,11 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * 此方法用于移除之前通过on()方法注册的拖拽事件监听器。
      * 它会调用父类的off方法来执行实际的事件监听器移除操作。
      */
-  public off(event: DDDragEvent): void {
-    super.off(event);
-  }
+    public off(event: DDDragEvent): void {
+        super.off(event);
+    }
 
-  /**
+    /**
      * 启用拖拽功能。
      * 如果拖拽功能已经启用，则直接返回。
      * 否则，为所有拖拽元素添加相关的事件监听器（鼠标和触摸事件），
@@ -251,34 +269,34 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      *
      * @returns void
      */
-  public enable(): void {
-    if (this.disabled === false) return;
-    super.enable();
-    this.dragEls.forEach(dragEl => {
-      dragEl.addEventListener('mousedown', this._mouseDown);
-      if (isTouch) {
-        dragEl.addEventListener('touchstart', touchstart);
-        dragEl.addEventListener('pointerdown', pointerdown);
-        // dragEl.style.touchAction = 'none'; // not needed unlike pointerdown doc comment
-      }
-    });
-    this.el.classList.remove('ui-draggable-disabled');
-  }
+    public enable(): void {
+        if (this.disabled === false) return;
+        super.enable();
+        this.dragEls.forEach((dragEl) => {
+            dragEl.addEventListener('mousedown', this._mouseDown);
+            if (isTouch) {
+                dragEl.addEventListener('touchstart', touchstart);
+                dragEl.addEventListener('pointerdown', pointerdown);
+                // dragEl.style.touchAction = 'none'; // not needed unlike pointerdown doc comment
+            }
+        });
+        this.el.classList.remove('ui-draggable-disabled');
+    }
 
-  public disable(forDestroy = false): void {
-    if (this.disabled === true) return;
-    super.disable();
-    this.dragEls.forEach(dragEl => {
-      dragEl.removeEventListener('mousedown', this._mouseDown);
-      if (isTouch) {
-        dragEl.removeEventListener('touchstart', touchstart);
-        dragEl.removeEventListener('pointerdown', pointerdown);
-      }
-    });
-    if (!forDestroy) this.el.classList.add('ui-draggable-disabled');
-  }
+    public disable(forDestroy = false): void {
+        if (this.disabled === true) return;
+        super.disable();
+        this.dragEls.forEach((dragEl) => {
+            dragEl.removeEventListener('mousedown', this._mouseDown);
+            if (isTouch) {
+                dragEl.removeEventListener('touchstart', touchstart);
+                dragEl.removeEventListener('pointerdown', pointerdown);
+            }
+        });
+        if (!forDestroy) this.el.classList.add('ui-draggable-disabled');
+    }
 
-  /**
+    /**
      * 销毁拖拽实例并清理所有相关资源
      *
      * 该方法执行以下清理操作：
@@ -290,30 +308,30 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * - 删除配置选项
      * - 调用父类销毁方法
      */
-  public destroy(): void {
-    if (this.dragTimeout) window.clearTimeout(this.dragTimeout);
-    delete this.dragTimeout;
-    if (this.mouseDownEvent) this._mouseUp(this.mouseDownEvent);
-    this.disable(true);
-    delete this.el;
-    delete this.helper;
-    delete this.option;
-    super.destroy();
-  }
+    public destroy(): void {
+        if (this.dragTimeout) window.clearTimeout(this.dragTimeout);
+        delete this.dragTimeout;
+        if (this.mouseDownEvent) this._mouseUp(this.mouseDownEvent);
+        this.disable(true);
+        delete this.el;
+        delete this.helper;
+        delete this.option;
+        super.destroy();
+    }
 
-  /**
+    /**
      * 更新拖拽选项配置
      * @param opts - 新的拖拽选项配置对象
      * @returns 返回当前 DDDraggable 实例以支持链式调用
      * @description 通过传入的选项对象更新现有的拖拽配置。这个方法会遍历传入对象的所有属性，
      * 并用这些新的属性值更新当前实例的选项配置。
      */
-  public updateOption(opts: DDDragOpt): DDDraggable {
-    Object.keys(opts).forEach(key => this.option[key] = opts[key]);
-    return this;
-  }
+    public updateOption(opts: DDDragOpt): DDDraggable {
+        Object.keys(opts).forEach((key) => (this.option[key] = opts[key]));
+        return this;
+    }
 
-  /**
+    /**
      * @internal call when mouse goes down before a dragstart happens
      *
      * 处理鼠标按下事件的受保护方法
@@ -336,39 +354,43 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * - 支持触摸设备，会额外添加触摸相关的事件监听
      * - 会自动移除当前活动元素的焦点
      */
-  protected _mouseDown(e: MouseEvent): boolean {
-    // don't let more than one widget handle mouseStart
-    if (DDManager.mouseHandled) return;
-    if (e.button !== 0) return true; // only left click
+    protected _mouseDown(e: MouseEvent): boolean {
+        // don't let more than one widget handle mouseStart
+        if (DDManager.mouseHandled) return;
+        if (e.button !== 0) return true; // only left click
 
-    // make sure we are not clicking on known object that handles mouseDown, or ones supplied by the user
-    if (!this.dragEls.find(el => el === e.target) && (e.target as HTMLElement).closest(skipMouseDown)) return true;
-    if (this.option.cancel) {
-      if ((e.target as HTMLElement).closest(this.option.cancel)) return true;
+        // make sure we are not clicking on known object that handles mouseDown, or ones supplied by the user
+        if (
+            !this.dragEls.find((el) => el === e.target) &&
+            (e.target as HTMLElement).closest(skipMouseDown)
+        )
+            return true;
+        if (this.option.cancel) {
+            if ((e.target as HTMLElement).closest(this.option.cancel)) return true;
+        }
+
+        this.mouseDownEvent = e;
+        delete this.dragging;
+        delete DDManager.dragElement;
+        delete DDManager.dropElement;
+        // document handler so we can continue receiving moves as the item is 'fixed' position, and capture=true so WE get a first crack
+        document.addEventListener('mousemove', this._mouseMove, {capture: true, passive: true}); // true=capture, not bubble
+        document.addEventListener('mouseup', this._mouseUp, true);
+        if (isTouch) {
+            e.currentTarget.addEventListener('touchmove', touchmove);
+            e.currentTarget.addEventListener('touchend', touchend);
+        }
+
+        e.preventDefault();
+        // preventDefault() prevents blur event which occurs just after mousedown event.
+        // if an editable content has focus, then blur must be call
+        if (document.activeElement) (document.activeElement as HTMLElement).blur();
+
+        DDManager.mouseHandled = true;
+        return true;
     }
 
-    this.mouseDownEvent = e;
-    delete this.dragging;
-    delete DDManager.dragElement;
-    delete DDManager.dropElement;
-    // document handler so we can continue receiving moves as the item is 'fixed' position, and capture=true so WE get a first crack
-    document.addEventListener('mousemove', this._mouseMove, {capture: true, passive: true}); // true=capture, not bubble
-    document.addEventListener('mouseup', this._mouseUp, true);
-    if (isTouch) {
-      e.currentTarget.addEventListener('touchmove', touchmove);
-      e.currentTarget.addEventListener('touchend', touchend);
-    }
-
-    e.preventDefault();
-    // preventDefault() prevents blur event which occurs just after mousedown event.
-    // if an editable content has focus, then blur must be call
-    if (document.activeElement) (document.activeElement as HTMLElement).blur();
-
-    DDManager.mouseHandled = true;
-    return true;
-  }
-
-  /**
+    /**
      * @internal method to call actual drag event
      *
      * 在拖拽过程中调用拖拽事件处理函数
@@ -386,16 +408,16 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * - 事件对象会被初始化,target设置为当前元素,type设置为'drag'
      * - 会调用配置的drag回调函数(如果存在),并传入事件对象和当前UI状态
      */
-  protected _callDrag(e: DragEvent): void {
-    if (!this.dragging) return;
-    const ev = Utils.initEvent<DragEvent>(e, {target: this.el, type: 'drag'});
-    if (this.option.drag) {
-      this.option.drag(ev, this.ui());
+    protected _callDrag(e: DragEvent): void {
+        if (!this.dragging) return;
+        const ev = Utils.initEvent<DragEvent>(e, {target: this.el, type: 'drag'});
+        if (this.option.drag) {
+            this.option.drag(ev, this.ui());
+        }
+        this.triggerEvent('drag', ev);
     }
-    this.triggerEvent('drag', ev);
-  }
 
-  /**
+    /**
      * @internal
      * called when the main page (after successful mousedown)
      * receives a move event to drag the item around the screen
@@ -414,53 +436,55 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * // 内部方法,通常不需要直接调用
      * this._mouseMove(dragEvent);
      */
-  protected _mouseMove(e: DragEvent): boolean {
-    // console.log(`${count++} move ${e.x},${e.y}`)
-    const s = this.mouseDownEvent;
-    this.lastDrag = e;
+    protected _mouseMove(e: DragEvent): boolean {
+        // console.log(`${count++} move ${e.x},${e.y}`)
+        const s = this.mouseDownEvent;
+        this.lastDrag = e;
 
-    if (this.dragging) {
-      this._dragFollow(e);
-      // delay actual grid handling drag until we pause for a while if set
-      if (DDManager.pauseDrag) {
-        const pause = Number.isInteger(DDManager.pauseDrag) ? DDManager.pauseDrag as number : 100;
-        if (this.dragTimeout) window.clearTimeout(this.dragTimeout);
-        this.dragTimeout = window.setTimeout(() => this._callDrag(e), pause);
-      } else {
-        this._callDrag(e);
-      }
-    } else if (Math.abs(e.x - s.x) + Math.abs(e.y - s.y) > 3) {
-      /**
+        if (this.dragging) {
+            this._dragFollow(e);
+            // delay actual grid handling drag until we pause for a while if set
+            if (DDManager.pauseDrag) {
+                const pause = Number.isInteger(DDManager.pauseDrag)
+                    ? (DDManager.pauseDrag as number)
+                    : 100;
+                if (this.dragTimeout) window.clearTimeout(this.dragTimeout);
+                this.dragTimeout = window.setTimeout(() => this._callDrag(e), pause);
+            } else {
+                this._callDrag(e);
+            }
+        } else if (Math.abs(e.x - s.x) + Math.abs(e.y - s.y) > 3) {
+            /**
              * don't start unless we've moved at least 3 pixels
              */
-      this.dragging = true;
-      DDManager.dragElement = this;
-      // if we're dragging an actual grid item, set the current drop as the grid (to detect enter/leave)
-      const grid = this.el.gridstackNode?.grid;
-      if (grid) {
-        DDManager.dropElement = (grid.el as DDElementHost).ddElement.ddDroppable;
-      } else {
-        delete DDManager.dropElement;
-      }
-      this.helper = this._createHelper();
-      this._setupHelperContainmentStyle();
-      this.dragTransform = Utils.getValuesFromTransformedElement(this.helperContainment);
-      this.dragOffset = this._getDragOffset(e, this.el, this.helperContainment);
-      this._setupHelperStyle(e);
+            this.dragging = true;
+            DDManager.dragElement = this;
+            // if we're dragging an actual grid item, set the current drop as the grid (to detect enter/leave)
+            const grid = this.el.gridstackNode?.grid;
+            if (grid) {
+                DDManager.dropElement = (grid.el as DDElementHost).ddElement.ddDroppable;
+            } else {
+                delete DDManager.dropElement;
+            }
+            this.helper = this._createHelper();
+            this._setupHelperContainmentStyle();
+            this.dragTransform = Utils.getValuesFromTransformedElement(this.helperContainment);
+            this.dragOffset = this._getDragOffset(e, this.el, this.helperContainment);
+            this._setupHelperStyle(e);
 
-      const ev = Utils.initEvent<DragEvent>(e, {target: this.el, type: 'dragstart'});
-      if (this.option.start) {
-        this.option.start(ev, this.ui());
-      }
-      this.triggerEvent('dragstart', ev);
-      // now track keyboard events to cancel or rotate
-      document.addEventListener('keydown', this._keyEvent);
+            const ev = Utils.initEvent<DragEvent>(e, {target: this.el, type: 'dragstart'});
+            if (this.option.start) {
+                this.option.start(ev, this.ui());
+            }
+            this.triggerEvent('dragstart', ev);
+            // now track keyboard events to cancel or rotate
+            document.addEventListener('keydown', this._keyEvent);
+        }
+        // e.preventDefault(); // passive = true. OLD: was needed otherwise we get text sweep text selection as we drag around
+        return true;
     }
-    // e.preventDefault(); // passive = true. OLD: was needed otherwise we get text sweep text selection as we drag around
-    return true;
-  }
 
-  /**
+    /**
      * @internal call when the mouse gets released to drop the item at current location
      *
      * 处理鼠标抬起（或触摸结束）事件的方法
@@ -481,47 +505,48 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      *
      * @fires dragstop - 当拖拽操作结束时触发
      */
-  protected _mouseUp(e: MouseEvent): void {
-    document.removeEventListener('mousemove', this._mouseMove, true);
-    document.removeEventListener('mouseup', this._mouseUp, true);
-    if (isTouch && e.currentTarget) { // destroy() during nested grid call us again wit fake _mouseUp
-      e.currentTarget.removeEventListener('touchmove', touchmove, true);
-      e.currentTarget.removeEventListener('touchend', touchend, true);
-    }
-    if (this.dragging) {
-      delete this.dragging;
-      delete (this.el.gridstackNode as GridStackNodeRotate)?._origRotate;
-      document.removeEventListener('keydown', this._keyEvent);
+    protected _mouseUp(e: MouseEvent): void {
+        document.removeEventListener('mousemove', this._mouseMove, true);
+        document.removeEventListener('mouseup', this._mouseUp, true);
+        if (isTouch && e.currentTarget) {
+            // destroy() during nested grid call us again wit fake _mouseUp
+            e.currentTarget.removeEventListener('touchmove', touchmove, true);
+            e.currentTarget.removeEventListener('touchend', touchend, true);
+        }
+        if (this.dragging) {
+            delete this.dragging;
+            delete (this.el.gridstackNode as GridStackNodeRotate)?._origRotate;
+            document.removeEventListener('keydown', this._keyEvent);
 
-      // reset the drop target if dragging over ourself (already parented, just moving during stop callback below)
-      if (DDManager.dropElement?.el === this.el.parentElement) {
+            // reset the drop target if dragging over ourself (already parented, just moving during stop callback below)
+            if (DDManager.dropElement?.el === this.el.parentElement) {
+                delete DDManager.dropElement;
+            }
+
+            this.helperContainment.style.position = this.parentOriginStylePosition || null;
+            if (this.helper !== this.el) this.helper.remove(); // hide now
+            this._removeHelperStyle();
+
+            const ev = Utils.initEvent<DragEvent>(e, {target: this.el, type: 'dragstop'});
+            if (this.option.stop) {
+                this.option.stop(ev); // NOTE: destroy() will be called when removing item, so expect NULL ptr after!
+            }
+            this.triggerEvent('dragstop', ev);
+
+            // call the droppable method to receive the item
+            if (DDManager.dropElement) {
+                DDManager.dropElement.drop(e);
+            }
+        }
+        delete this.helper;
+        delete this.mouseDownEvent;
+        delete DDManager.dragElement;
         delete DDManager.dropElement;
-      }
-
-      this.helperContainment.style.position = this.parentOriginStylePosition || null;
-      if (this.helper !== this.el) this.helper.remove(); // hide now
-      this._removeHelperStyle();
-
-      const ev = Utils.initEvent<DragEvent>(e, {target: this.el, type: 'dragstop'});
-      if (this.option.stop) {
-        this.option.stop(ev); // NOTE: destroy() will be called when removing item, so expect NULL ptr after!
-      }
-      this.triggerEvent('dragstop', ev);
-
-      // call the droppable method to receive the item
-      if (DDManager.dropElement) {
-        DDManager.dropElement.drop(e);
-      }
+        delete DDManager.mouseHandled;
+        e.preventDefault();
     }
-    delete this.helper;
-    delete this.mouseDownEvent;
-    delete DDManager.dragElement;
-    delete DDManager.dropElement;
-    delete DDManager.mouseHandled;
-    e.preventDefault();
-  }
 
-  /**
+    /**
      * @internal call when keys are being pressed - use Esc to cancel, R to rotate
      *
      * 处理键盘事件
@@ -540,35 +565,35 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * @param e - 键盘事件对象
      * @protected
      */
-  protected _keyEvent(e: KeyboardEvent): void {
-    const n = this.el.gridstackNode as GridStackNodeRotate;
-    const grid = n?.grid || (DDManager.dropElement?.el as GridHTMLElement)?.gridstack;
+    protected _keyEvent(e: KeyboardEvent): void {
+        const n = this.el.gridstackNode as GridStackNodeRotate;
+        const grid = n?.grid || (DDManager.dropElement?.el as GridHTMLElement)?.gridstack;
 
-    if (e.key === 'Escape') {
-      if (n && n._origRotate) {
-        n._orig = n._origRotate;
-        delete n._origRotate;
-      }
-      grid?.cancelDrag();
-      this._mouseUp(this.mouseDownEvent);
-    } else if (n && grid && (e.key === 'r' || e.key === 'R')) {
-      if (!Utils.canBeRotated(n)) return;
-      n._origRotate = n._origRotate || {...n._orig}; // store the real orig size in case we Esc after doing rotation
-      delete n._moving; // force rotate to happen (move waits for >50% coverage otherwise)
-      grid.setAnimation(false) // immediate rotate so _getDragOffset() gets the right dom size below
-        .rotate(n.el, {top: -this.dragOffset.offsetTop, left: -this.dragOffset.offsetLeft})
-        .setAnimation();
-      n._moving = true;
-      this.dragOffset = this._getDragOffset(this.lastDrag, n.el, this.helperContainment);
-      this.helper.style.width = this.dragOffset.width + 'px';
-      this.helper.style.height = this.dragOffset.height + 'px';
-      Utils.swap(n._orig, 'w', 'h');
-      delete n._rect;
-      this._mouseMove(this.lastDrag);
+        if (e.key === 'Escape') {
+            if (n && n._origRotate) {
+                n._orig = n._origRotate;
+                delete n._origRotate;
+            }
+            grid?.cancelDrag();
+            this._mouseUp(this.mouseDownEvent);
+        } else if (n && grid && (e.key === 'r' || e.key === 'R')) {
+            if (!Utils.canBeRotated(n)) return;
+            n._origRotate = n._origRotate || {...n._orig}; // store the real orig size in case we Esc after doing rotation
+            delete n._moving; // force rotate to happen (move waits for >50% coverage otherwise)
+            grid.setAnimation(false) // immediate rotate so _getDragOffset() gets the right dom size below
+                .rotate(n.el, {top: -this.dragOffset.offsetTop, left: -this.dragOffset.offsetLeft})
+                .setAnimation();
+            n._moving = true;
+            this.dragOffset = this._getDragOffset(this.lastDrag, n.el, this.helperContainment);
+            this.helper.style.width = this.dragOffset.width + 'px';
+            this.helper.style.height = this.dragOffset.height + 'px';
+            Utils.swap(n._orig, 'w', 'h');
+            delete n._rect;
+            this._mouseMove(this.lastDrag);
+        }
     }
-  }
 
-  /**
+    /**
      * @internal create a clone copy (or user defined method) of the original drag item if set
      *
      * 根据配置创建拖拽助手元素。
@@ -587,21 +612,26 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      *
      * 在创建助手元素时会保存原始元素的样式属性,以便后续恢复。
      */
-  protected _createHelper(): HTMLElement {
-    let helper = this.el;
-    if (typeof this.option.helper === 'function') {
-      helper = this.option.helper(this.el);
-    } else if (this.option.helper === 'clone') {
-      helper = Utils.cloneNode(this.el);
+    protected _createHelper(): HTMLElement {
+        let helper = this.el;
+        if (typeof this.option.helper === 'function') {
+            helper = this.option.helper(this.el);
+        } else if (this.option.helper === 'clone') {
+            helper = Utils.cloneNode(this.el);
+        }
+        if (!helper.parentElement) {
+            Utils.appendTo(
+                helper,
+                this.option.appendTo === 'parent' ? this.el.parentElement : this.option.appendTo
+            );
+        }
+        this.dragElementOriginStyle = DDDraggable.originStyleProp.map(
+            (prop) => this.el.style[prop]
+        );
+        return helper;
     }
-    if (!helper.parentElement) {
-      Utils.appendTo(helper, this.option.appendTo === 'parent' ? this.el.parentElement : this.option.appendTo);
-    }
-    this.dragElementOriginStyle = DDDraggable.originStyleProp.map(prop => this.el.style[prop]);
-    return helper;
-  }
 
-  /**
+    /**
      * @internal set the fix position of the dragged item
      *
      * @internal 设置辅助元素的样式
@@ -619,43 +649,43 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * @returns 当前实例以支持链式调用
      * @protected
      */
-  protected _setupHelperStyle(e: DragEvent): DDDraggable {
-    // 添加拖拽状态的CSS类
-    this.helper.classList.add('ui-draggable-dragging');
+    protected _setupHelperStyle(e: DragEvent): DDDraggable {
+        // 添加拖拽状态的CSS类
+        this.helper.classList.add('ui-draggable-dragging');
 
-    // TODO: 考虑使用style.cssText一次性设置所有样式？
-    const style = this.helper.style;
+        // TODO: 考虑使用style.cssText一次性设置所有样式？
+        const style = this.helper.style;
 
-    // 允许鼠标事件穿透到下方元素,用于检测enter/leave事件
-    style.pointerEvents = 'none';
+        // 允许鼠标事件穿透到下方元素,用于检测enter/leave事件
+        style.pointerEvents = 'none';
 
-    // 设置helper元素的尺寸
-    style.width = this.dragOffset.width + 'px';
-    style.height = this.dragOffset.height + 'px';
+        // 设置helper元素的尺寸
+        style.width = this.dragOffset.width + 'px';
+        style.height = this.dragOffset.height + 'px';
 
-    // 优化渲染性能
-    style.willChange = 'left, top';
+        // 优化渲染性能
+        style.willChange = 'left, top';
 
-    // 使用fixed定位以支持跨网格拖拽
-    style.position = 'fixed';
+        // 使用fixed定位以支持跨网格拖拽
+        style.position = 'fixed';
 
-    // 定位到当前鼠标位置
-    this._dragFollow(e);
+        // 定位到当前鼠标位置
+        this._dragFollow(e);
 
-    // 暂时禁用过渡动画
-    style.transition = 'none';
+        // 暂时禁用过渡动画
+        style.transition = 'none';
 
-    // 延时恢复过渡动画
-    setTimeout(() => {
-      if (this.helper) {
-        style.transition = null;
-      }
-    }, 0);
+        // 延时恢复过渡动画
+        setTimeout(() => {
+            if (this.helper) {
+                style.transition = null;
+            }
+        }, 0);
 
-    return this;
-  }
+        return this;
+    }
 
-  /**
+    /**
      *  @internal restore back the original style before dragging
      *
      * 该方法执行以下操作:
@@ -673,27 +703,29 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * @internal
      * 这是一个受保护的方法,仅供内部使用。
      */
-  protected _removeHelperStyle(): DDDraggable {
-    this.helper.classList.remove('ui-draggable-dragging');
-    const node = (this.helper as GridItemHTMLElement)?.gridstackNode;
-    // don't bother restoring styles if we're gonna remove anyway...
-    if (!node?._isAboutToRemove && this.dragElementOriginStyle) {
-      const helper = this.helper;
-      // don't animate, otherwise we animate offseted when switching back to 'absolute' from 'fixed'.
-      // TODO: this also removes resizing animation which doesn't have this issue, but others.
-      // Ideally both would animate ('move' would immediately restore 'absolute' and adjust coordinate to match,
-      // then trigger a delay (repaint) to restore to final dest with animate) but then we need to make sure 'resizestop'
-      // is called AFTER 'transitionend' event is received (see https://github.com/gridstack/gridstack.js/issues/2033)
-      const transition = this.dragElementOriginStyle['transition'] || null;
-      helper.style.transition = this.dragElementOriginStyle['transition'] = 'none'; // can't be NULL #1973
-      DDDraggable.originStyleProp.forEach(prop => helper.style[prop] = this.dragElementOriginStyle[prop] || null);
-      setTimeout(() => helper.style.transition = transition, 50); // recover animation from saved vars after a pause (0 isn't enough #1973)
+    protected _removeHelperStyle(): DDDraggable {
+        this.helper.classList.remove('ui-draggable-dragging');
+        const node = (this.helper as GridItemHTMLElement)?.gridstackNode;
+        // don't bother restoring styles if we're gonna remove anyway...
+        if (!node?._isAboutToRemove && this.dragElementOriginStyle) {
+            const helper = this.helper;
+            // don't animate, otherwise we animate offseted when switching back to 'absolute' from 'fixed'.
+            // TODO: this also removes resizing animation which doesn't have this issue, but others.
+            // Ideally both would animate ('move' would immediately restore 'absolute' and adjust coordinate to match,
+            // then trigger a delay (repaint) to restore to final dest with animate) but then we need to make sure 'resizestop'
+            // is called AFTER 'transitionend' event is received (see https://github.com/gridstack/gridstack.js/issues/2033)
+            const transition = this.dragElementOriginStyle['transition'] || null;
+            helper.style.transition = this.dragElementOriginStyle['transition'] = 'none'; // can't be NULL #1973
+            DDDraggable.originStyleProp.forEach(
+                (prop) => (helper.style[prop] = this.dragElementOriginStyle[prop] || null)
+            );
+            setTimeout(() => (helper.style.transition = transition), 50); // recover animation from saved vars after a pause (0 isn't enough #1973)
+        }
+        delete this.dragElementOriginStyle;
+        return this;
     }
-    delete this.dragElementOriginStyle;
-    return this;
-  }
 
-  /**
+    /**
      * @internal updates the top/left position to follow the mouse
      *
      * 在拖拽过程中更新被拖拽元素(helper)的位置
@@ -708,19 +740,22 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * helper元素的位置通过设置style的left和top属性来更新。
      * containmentRect用于处理元素容器的边界，当前默认值为{left: 0, top: 0}。
      */
-  protected _dragFollow(e: DragEvent): void {
-    const containmentRect = {left: 0, top: 0};
-    // if (this.helper.style.position === 'absolute') { // we use 'fixed'
-    //   const { left, top } = this.helperContainment.getBoundingClientRect();
-    //   containmentRect = { left, top };
-    // }
-    const style = this.helper.style;
-    const offset = this.dragOffset;
-    style.left = (e.clientX + offset.offsetLeft - containmentRect.left) * this.dragTransform.xScale + 'px';
-    style.top = (e.clientY + offset.offsetTop - containmentRect.top) * this.dragTransform.yScale + 'px';
-  }
+    protected _dragFollow(e: DragEvent): void {
+        const containmentRect = {left: 0, top: 0};
+        // if (this.helper.style.position === 'absolute') { // we use 'fixed'
+        //   const { left, top } = this.helperContainment.getBoundingClientRect();
+        //   containmentRect = { left, top };
+        // }
+        const style = this.helper.style;
+        const offset = this.dragOffset;
+        style.left =
+            (e.clientX + offset.offsetLeft - containmentRect.left) * this.dragTransform.xScale +
+            'px';
+        style.top =
+            (e.clientY + offset.offsetTop - containmentRect.top) * this.dragTransform.yScale + 'px';
+    }
 
-  /**
+    /**
      * @internal
      *
      * 设置帮助元素的容器样式
@@ -734,18 +769,18 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * @returns 当前DDDraggable实例,支持链式调用
      * @protected
      */
-  protected _setupHelperContainmentStyle(): DDDraggable {
-    this.helperContainment = this.helper.parentElement;
-    if (this.helper.style.position !== 'fixed') {
-      this.parentOriginStylePosition = this.helperContainment.style.position;
-      if (getComputedStyle(this.helperContainment).position.match(/static/)) {
-        this.helperContainment.style.position = 'relative';
-      }
+    protected _setupHelperContainmentStyle(): DDDraggable {
+        this.helperContainment = this.helper.parentElement;
+        if (this.helper.style.position !== 'fixed') {
+            this.parentOriginStylePosition = this.helperContainment.style.position;
+            if (getComputedStyle(this.helperContainment).position.match(/static/)) {
+                this.helperContainment.style.position = 'relative';
+            }
+        }
+        return this;
     }
-    return this;
-  }
 
-  /**
+    /**
      * @internal
      * 获取拖拽元素的偏移量信息
      *
@@ -764,31 +799,30 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      *
      * @protected
      */
-  protected _getDragOffset(event: DragEvent, el: HTMLElement, parent: HTMLElement): DragOffset {
+    protected _getDragOffset(event: DragEvent, el: HTMLElement, parent: HTMLElement): DragOffset {
+        // 处理祖先元素可能具有的transform/perspective CSS属性导致的视点变化
+        let xformOffsetX = 0;
+        let xformOffsetY = 0;
+        if (parent) {
+            xformOffsetX = this.dragTransform.xOffset;
+            xformOffsetY = this.dragTransform.yOffset;
+        }
 
-    // 处理祖先元素可能具有的transform/perspective CSS属性导致的视点变化
-    let xformOffsetX = 0;
-    let xformOffsetY = 0;
-    if (parent) {
-      xformOffsetX = this.dragTransform.xOffset;
-      xformOffsetY = this.dragTransform.yOffset;
+        // 获取目标元素的边界矩形
+        const targetOffset = el.getBoundingClientRect();
+
+        // 返回计算得到的偏移量信息
+        return {
+            left: targetOffset.left,
+            top: targetOffset.top,
+            offsetLeft: -event.clientX + targetOffset.left - xformOffsetX,
+            offsetTop: -event.clientY + targetOffset.top - xformOffsetY,
+            width: targetOffset.width * this.dragTransform.xScale,
+            height: targetOffset.height * this.dragTransform.yScale
+        };
     }
 
-    // 获取目标元素的边界矩形
-    const targetOffset = el.getBoundingClientRect();
-
-    // 返回计算得到的偏移量信息
-    return {
-      left: targetOffset.left,
-      top: targetOffset.top,
-      offsetLeft: -event.clientX + targetOffset.left - xformOffsetX,
-      offsetTop: -event.clientY + targetOffset.top - xformOffsetY,
-      width: targetOffset.width * this.dragTransform.xScale,
-      height: targetOffset.height * this.dragTransform.yScale
-    };
-  }
-
-  /**
+    /**
      * @internal TODO: set to public as called by DDDroppable!
      *
      * 获取拖拽元素的 UI 数据
@@ -802,19 +836,20 @@ export class DDDraggable extends DDBaseImplement implements HTMLElementExtendOpt
      * 该方法计算拖拽辅助元素相对于其父容器的位置，并应用缩放变换。
      * 位置值会根据 dragTransform 中定义的 xScale 和 yScale 进行相应调整。
      */
-  public ui(): DDUIData {
-    const containmentEl = this.el.parentElement;
-    const containmentRect = containmentEl.getBoundingClientRect();
-    const offset = this.helper.getBoundingClientRect();
-    return {
-      position: { //Current CSS position of the helper as { top, left } object
-        top: (offset.top - containmentRect.top) * this.dragTransform.yScale,
-        left: (offset.left - containmentRect.left) * this.dragTransform.xScale
-      }
-      /* not used by GridStack for now...
+    public ui(): DDUIData {
+        const containmentEl = this.el.parentElement;
+        const containmentRect = containmentEl.getBoundingClientRect();
+        const offset = this.helper.getBoundingClientRect();
+        return {
+            position: {
+                //Current CSS position of the helper as { top, left } object
+                top: (offset.top - containmentRect.top) * this.dragTransform.yScale,
+                left: (offset.left - containmentRect.left) * this.dragTransform.xScale
+            }
+            /* not used by GridStack for now...
             helper: [this.helper], //The object arr representing the helper that's being dragged.
             offset: { top: offset.top, left: offset.left } // Current offset position of the helper as { top, left } object.
             */
-    };
-  }
+        };
+    }
 }
