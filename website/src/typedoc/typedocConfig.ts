@@ -38,6 +38,9 @@ export const typedocPackageConfig: StarlightTypeDocOptions[] = result.map(config
     tsconfig: `${url}/tsconfig.json`,
     typeDoc: {
       readme: `${url}/${config.readme}`,
+      excludeInternal: false,
+      lightHighlightTheme: 'dracula-soft',
+      darkHighlightTheme: 'github-dark'
     },
     name: config.name,
   };
