@@ -12,7 +12,7 @@ import { GridHTMLElement } from './gridstack';
 /**
  * 拖放相关的选项接口
  * @interface DDDropOpt
- * 
+ *
  * @example
  * const dropOpt: DDDropOpt = {
  *   accept: (el) => el.classList.contains('grid-item')
@@ -45,7 +45,7 @@ export type DDOpts = 'enable' | 'disable' | 'destroy' | 'option' | string | any;
  * 用于拖拽调整网格大小时的关键尺寸属性类型
  * @typedef {string} DDKey
  * - 'minWidth' - 最小宽度
- * - 'minHeight' - 最小高度 
+ * - 'minHeight' - 最小高度
  * - 'maxWidth' - 最大宽度
  * - 'maxHeight' - 最大高度
  * - 'maxHeightMoveUp' - 向上移动时的最大高度
@@ -57,7 +57,7 @@ export type DDKey = 'minWidth' | 'minHeight' | 'maxWidth' | 'maxHeight' | 'maxHe
 /**
  * 表示可拖拽网格堆栈中使用的数值类型
  * @typedef {number | string} DDValue
- * 
+ *
  * 该类型可以是:
  * - `number`: 数字值
  * - `string`: 字符串值
@@ -76,10 +76,10 @@ export type DDCallback = (event: Event, arg2: GridItemHTMLElement, helper?: Grid
 
 /**
  * 拖拽和放置操作管理类，用于处理网格布局中的拖拽、调整大小和放置功能
- * 
+ *
  * @class DDGridStack
  * @description 该类管理网格布局中元素的拖拽（drag）、调整大小（resize）和放置（drop）行为
- * 
+ *
  * @example
  * ```typescript
  * const ddManager = new DDGridStack();
@@ -88,14 +88,14 @@ export type DDCallback = (event: Event, arg2: GridItemHTMLElement, helper?: Grid
  *   stop: (event) => console.log('停止拖拽')
  * });
  * ```
- * 
+ *
  * @remarks
  * - 提供元素的拖拽功能配置
  * - 处理元素的大小调整功能
  * - 管理元素的放置交互
  * - 支持事件监听和取消
  * - 可以动态启用/禁用拖拽相关功能
- * 
+ *
  * @public
  */
 export class DDGridStack {
@@ -112,16 +112,16 @@ export class DDGridStack {
    * @param key 当 opts 为 'option' 时使用的选项键名
    * @param value 当 opts 为 'option' 时使用的选项值
    * @returns 当前 DDGridStack 实例，支持链式调用
-   * 
+   *
    * @example
    * ```typescript
    * // 启用调整大小
    * gridstack.resizable(element, 'enable');
-   * 
+   *
    * // 设置特定选项
    * gridstack.resizable(element, 'option', 'handles', 'e,w');
    * ```
-   * 
+   *
    * @description
    * 此方法处理网格项的可调整大小功能，支持：
    * - 处理调整大小句柄的显示位置（n,e,s,w,se,sw,ne,nw）
@@ -166,7 +166,7 @@ export class DDGridStack {
 
   /**
    * 为网格项设置拖拽功能
-   * 
+   *
    * @param el - 需要添加拖拽功能的网格项 HTML 元素
    * @param opts - 拖拽选项配置。可以是以下值：
    *               - 'disable': 禁用拖拽
@@ -176,14 +176,14 @@ export class DDGridStack {
    *               - 或一个包含 start/stop/drag 回调函数的对象
    * @param key - 当 opts 为 'option' 时使用的选项键名
    * @param value - 当 opts 为 'option' 时使用的选项值
-   * 
+   *
    * @returns 当前 DDGridStack 实例，支持链式调用
-   * 
+   *
    * @example
    * ```typescript
    * // 启用拖拽
    * gridstack.draggable(element, 'enable');
-   * 
+   *
    * // 设置特定选项
    * gridstack.draggable(element, 'option', 'handle', '.my-handle');
    * ```
@@ -231,16 +231,16 @@ export class DDGridStack {
    * - DDDropOpt: 简单的字符串命令 ('disable' | 'enable' | 'destroy' | 'option')
    * - 用于配置 droppable 行为的选项对象
    * @param key 当 opts 为 'option' 时使用的选项键名
-   * @param value 当 opts 为 'option' 时使用的选项值 
+   * @param value 当 opts 为 'option' 时使用的选项值
    * @returns 当前 DDGridStack 实例，支持链式调用
-   * 
+   *
    * @description
    * 该方法用于配置网格项的放置行为。它可以:
    * - 启用/禁用元素的放置功能
    * - 销毁放置功能
    * - 设置单个放置选项
    * - 配置完整的放置行为
-   * 
+   *
    * 如果 opts.accept 是函数，会对其进行特殊处理以确保正确的上下文绑定。
    */
   public droppable(el: GridItemHTMLElement, opts: DDOpts | DDDropOpt, key?: DDKey, value?: DDValue): DDGridStack {
@@ -266,7 +266,7 @@ export class DDGridStack {
    * 检查一个元素是否可以接受拖拽放置
    * @param el - 需要检查的元素，类型为 DDElementHost
    * @returns 如果元素可以接受拖拽放置则返回 true，否则返回 false
-   * @description 
+   * @description
    * 判断条件:
    * 1. 元素必须存在
    * 2. 元素必须有 ddElement 属性
@@ -281,7 +281,7 @@ export class DDGridStack {
    * 检查一个 DOM 元素是否可拖动
    * @param el 要检查的 DOM 元素，需要包含 ddElement 和 ddDraggable 属性
    * @returns {boolean} 如果元素可拖动返回 true，否则返回 false
-   * @description 
+   * @description
    * - 元素必须具有 ddElement 属性
    * - ddElement 必须具有 ddDraggable 属性
    * - ddDraggable 的 disabled 属性必须为 false
@@ -294,7 +294,7 @@ export class DDGridStack {
    * 检查一个元素是否可以调整大小
    * @param el - 要检查的元素对象，需要实现 DDElementHost 接口
    * @returns true 表示元素可以调整大小，false 表示不可以
-   * 
+   *
    * 注意:该方法会检查以下条件:
    * - 元素必须存在 ddElement 属性
    * - ddElement 必须有 ddResizable 属性
@@ -306,7 +306,7 @@ export class DDGridStack {
 
   /**
    * 为网格项元素绑定拖拽相关事件监听器
-   * 
+   *
    * @param el - 需要绑定事件的网格项 HTML 元素
    * @param name - 事件名称
    * @param callback - 事件回调函数，接收三个参数:
@@ -340,14 +340,14 @@ export class DDGridStack {
 
   /**
    * 获取与指定DOM元素相关联的拖拽元素（DDElement）数组
-   * 
+   *
    * @param els - 要获取拖拽元素的GridStack元素或元素集合
    * @param opts - 拖拽操作的选项配置
    *              'destroy' - 销毁拖拽元素
    *              'disable' - 禁用拖拽功能
-   * 
+   *
    * @returns 返回DDElement数组。如果没有找到相应元素或元素不满足条件，则返回空数组
-   * 
+   *
    * @description
    * 该方法会根据传入的GridStack元素，返回对应的拖拽元素数组。
    * 如果元素是网格本身或opts不是'destroy'或'disable'，则会创建新的拖拽元素（如果不存在）。

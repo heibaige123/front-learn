@@ -87,7 +87,7 @@ interface RectScaleReciprocal {
  *
  * @extends DDBaseImplement
  * @implements HTMLElementExtendOpt<DDResizableOpt>
- * 
+ *
  * @example
  * ```typescript
  * const resizable = new DDResizable(element, {
@@ -95,17 +95,17 @@ interface RectScaleReciprocal {
  *   autoHide: true
  * });
  * ```
- * 
+ *
  * @property {DDResizableHandle[]} handlers - 调整大小的手柄数组
  * @property {Rect} originalRect - 元素的原始矩形尺寸
  * @property {RectScaleReciprocal} rectScale - 矩形缩放比例
  * @property {GridItemHTMLElement} el - 要调整大小的目标 HTML 元素
  * @property {DDResizableOpt} option - 可调整大小的配置选项
- * 
+ *
  * @fires resizestart - 开始调整大小时触发
  * @fires resize - 调整大小过程中触发
  * @fires resizestop - 结束调整大小时触发
- * 
+ *
  * @public
  */
 export class DDResizable extends DDBaseImplement implements HTMLElementExtendOpt<DDResizableOpt> {

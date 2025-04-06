@@ -10,7 +10,7 @@ import { Utils } from './utils';
  * Detect touch support - Windows Surface devices and other touch devices
  * should we use this instead ? (what we had for always showing resize handles)
  * /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
- * 
+ *
  * 检测当前环境是否支持触摸操作
  * 通过检查以下条件：
  * - document 或 window 对象上是否有 ontouchstart 事件
@@ -37,15 +37,15 @@ export const isTouch: boolean = typeof window !== 'undefined' && typeof document
  * 触摸处理辅助类
  */
 class DDTouch {
-  /** 
+  /**
    * flag to track if touch is being handled
-   * 
+   *
    * 标记触摸是否正在被处理 */
   public static touchHandled: boolean;
 
-  /** 
+  /**
    * timeout for delayed pointer leave events
-   * 
+   *
    * 延迟指针离开事件的超时 */
   public static pointerLeaveTimeout: number;
 }

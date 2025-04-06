@@ -30,7 +30,7 @@ export class DDResizableHandle {
    * @param host - 将要变为可调整大小的网格项 HTML 元素
    * @param dir - 调整大小句柄的方向/方位
    * @param option - 可调整大小句柄的配置选项
-   * 
+   *
    * 构造函数初始化事件绑定（确保正确的 this 上下文），
    * 并通过调用内部 _init() 方法来设置调整大小句柄。
    */
@@ -61,7 +61,7 @@ export class DDResizableHandle {
     this.host.appendChild(this.el);
     // 添加鼠标按下事件监听器
     this.el.addEventListener('mousedown', this._mouseDown);
-    
+
     // 如果是触摸设备，添加触摸相关事件监听器
     if (isTouch) {
       this.el.addEventListener('touchstart', touchstart);

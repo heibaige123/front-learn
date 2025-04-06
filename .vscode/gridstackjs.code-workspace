@@ -1,0 +1,14 @@
+{
+    "settings": {
+        "mcp.server": "mcp-server-time",
+        "mcp.server.timezone": "America/Los_Angeles"
+    },
+    "extensions": {
+    },
+    "folders": [
+        {
+            "path": "../packages/single-packages/gridstackjs",
+            "name": "gridstackjs"
+        }
+    ],
+}

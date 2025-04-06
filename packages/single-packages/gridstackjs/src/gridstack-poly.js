@@ -149,17 +149,17 @@ if (!Array.prototype.findIndex) {
 // from: https://github.com/jserz/js_piece/blob/master/DOM/Element/prepend()/prepend().md
 (function (arr) {
   arr.forEach(function (item) {
-      item.prepend = item.prepend || function () {
-          var argArr = Array.prototype.slice.call(arguments),
-              docFrag = document.createDocumentFragment();
+    item.prepend = item.prepend || function () {
+      var argArr = Array.prototype.slice.call(arguments),
+        docFrag = document.createDocumentFragment();
 
-          argArr.forEach(function (argItem) {
-              var isNode = argItem instanceof Node;
-              docFrag.appendChild(isNode ? argItem : document.createTextNode(String(argItem)));
-          });
+      argArr.forEach(function (argItem) {
+        var isNode = argItem instanceof Node;
+        docFrag.appendChild(isNode ? argItem : document.createTextNode(String(argItem)));
+      });
 
-          this.insertBefore(docFrag, this.firstChild);
-      };
+      this.insertBefore(docFrag, this.firstChild);
+    };
   });
 })([Element.prototype, Document.prototype, DocumentFragment.prototype]);
 
@@ -182,7 +182,7 @@ if (!Array.prototype['forEach']) {
     // 3. Let len be toUint32(lenValue).
     var len = O.length >>> 0;
 
-    // 4. If isCallable(callback) is false, throw a TypeError exception. 
+    // 4. If isCallable(callback) is false, throw a TypeError exception.
     // See: http://es5.github.com/#x9.11
     if (typeof callback !== "function") { throw new TypeError(callback + ' is not a function'); }
 
@@ -224,39 +224,39 @@ if (!Array.prototype['forEach']) {
 // https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
 (function(){
   try{
-      new window.CustomEvent('T');
+    new window.CustomEvent('T');
   }catch(e){
-      var CustomEvent = function(event, params){
-          params = params || { bubbles: false, cancelable: false, detail: undefined };
+    var CustomEvent = function(event, params){
+      params = params || { bubbles: false, cancelable: false, detail: undefined };
 
-          var evt = document.createEvent('CustomEvent');
+      var evt = document.createEvent('CustomEvent');
 
-          evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+      evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
 
-          return evt;
-      };
+      return evt;
+    };
 
-      CustomEvent.prototype = window.Event.prototype;
+    CustomEvent.prototype = window.Event.prototype;
 
-      window.CustomEvent = CustomEvent;
+    window.CustomEvent = CustomEvent;
   }
 })();
 
 // https://github.com/jserz/js_piece/blob/master/DOM/ChildNode/remove()/remove().md
 (function (arr) {
   arr.forEach(function (item) {
-   if (item.hasOwnProperty('remove')) {
-     return;
-   }
-   Object.defineProperty(item, 'remove', {
-     configurable: true,
-     enumerable: true,
-     writable: true,
-     value: function remove() {
-       this.parentNode.removeChild(this);
-     }
-   });
- });
+    if (item.hasOwnProperty('remove')) {
+      return;
+    }
+    Object.defineProperty(item, 'remove', {
+      configurable: true,
+      enumerable: true,
+      writable: true,
+      value: function remove() {
+        this.parentNode.removeChild(this);
+      }
+    });
+  });
 })([Element.prototype, CharacterData.prototype, DocumentType.prototype]);
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Element/matches
@@ -268,10 +268,10 @@ if (!Element.prototype.matches) {
       Element.prototype.oMatchesSelector ||
       Element.prototype.webkitMatchesSelector ||
       function(s) {
-          var matches = (this.document || this.ownerDocument).querySelectorAll(s),
-              i = matches.length;
-          while (--i >= 0 && matches.item(i) !== this) {}
-          return i > -1;
+        var matches = (this.document || this.ownerDocument).querySelectorAll(s),
+          i = matches.length;
+        while (--i >= 0 && matches.item(i) !== this) {}
+        return i > -1;
       };
 }
 

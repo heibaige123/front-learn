@@ -104,23 +104,23 @@ export function obsoleteAttr(
 export class Utils {
 
   /**
-   * convert a potential selector into actual list of html elements. 
+   * convert a potential selector into actual list of html elements.
    * optional root which defaults to document (for shadow dom)
-   * 
+   *
    * 根据各种可能的输入类型获取HTML元素。
-   * 
+   *
    * @param els - 元素选择器。可以是：
    *    - CSS选择器字符串（例如，'.my-class'，'#my-id'）
    *    - 数字ID字符串（例如，'123'）
    *    - HTMLElement实例
-   * 
+   *
    * @param root - 从中搜索元素的根元素或文档。
    *    - 默认为全局document。
-   * 
+   *
    * @returns 匹配选择器的HTMLElement对象数组。
    *    - 如果传递单个HTMLElement，则返回仅包含该元素的数组。
    *    - 如果未找到元素，则返回空数组。
-   * 
+   *
    * @remarks 该函数对用作选择器的数字ID有特殊处理。
    *    - 如果选择器以数字开头，则假定它是ID并使用getElementById。
    *    - 如果选择器不匹配任何内容且不以'.'或'#'开头，它会尝试将'.'然后'#'附加到选择器作为后备选项。
@@ -152,29 +152,29 @@ export class Utils {
 
   /**
    * convert a potential selector into actual single element. optional root which defaults to document (for shadow dom)
-   * 
+   *
    * 根据输入的选择器获取HTMLElement，或者如果输入已经是HTMLElement则直接返回该元素。
-   * 
+   *
    * @param els - 元素标识符或HTMLElement：可以是字符串选择器（id、类、属性或简单名称）或HTMLElement。
    * @param root - 用于搜索的根元素或文档。默认为document。
    * @returns 找到的HTMLElement或原始元素（如果它已经是HTMLElement）。如果未找到元素，则返回null。
-   * 
+   *
    * @example
    * // 通过ID获取元素
    * const element = Utils.getElement('#myElement');
-   * 
+   *
    * @example
    * // 通过类获取元素
    * const element = Utils.getElement('.myClass');
-   * 
+   *
    * @example
    * // 通过属性获取元素
    * const element = Utils.getElement('[data-gs-id=1]');
-   * 
+   *
    * @example
    * // 通过可能是ID或元素名称的字符串获取元素
    * const element = Utils.getElement('myElement');
-   * 
+   *
    * @example
    * // 在特定的根元素内搜索
    * const element = Utils.getElement('.child', parentElement);
@@ -208,11 +208,11 @@ export class Utils {
     return els;
   }
 
-  /** 
+  /**
    * true if widget (or grid) makes this item lazyLoad
-   * 
+   *
    * 确定一个节点是否应该被懒加载。
-   * 
+   *
    * @param n - 要检查懒加载的GridStackNode
    * @returns 如果节点应该根据节点的lazyLoad属性或网格选项进行懒加载则返回true，
    *          否则返回false。具体来说，当以下条件满足时返回true：
@@ -226,17 +226,17 @@ export class Utils {
 
   /**
    * create a div with the given classes
-   * 
+   *
    * 创建一个带有指定类名的div元素
-   * 
+   *
    * @param classes - 要添加到div元素的CSS类名数组
    * @param parent - 可选的父元素，如果提供，创建的div将被添加到这个父元素中
    * @returns 创建的div元素
-   * 
+   *
    * @example
    * // 创建一个带有'grid-stack-item'类的div
    * const itemDiv = Utils.createDiv(['grid-stack-item']);
-   * 
+   *
    * @example
    * // 创建一个带有多个类并添加到容器的div
    * const contentDiv = Utils.createDiv(['grid-stack-content', 'widget'], containerElement);
@@ -253,9 +253,9 @@ export class Utils {
 
   /**
    * true if we should resize to content. strict=true when only 'sizeToContent:true' and not a number which lets user adjust
-   * 
+   *
    * 根据节点配置和网格选项确定节点是否应该根据内容调整大小。
-   * 
+   *
    * @param n - 要检查的网格节点
    * @param strict - 如果为true，要求明确设置sizeToContent=true或grid.opts.sizeToContent=true且节点值未定义。
    *                 如果为false（默认），允许更宽松的条件，任何真值都有效。
@@ -270,13 +270,13 @@ export class Utils {
 
   /**
    * returns true if a and b overlap
-   * 
+   *
    * 检查两个网格位置是否重叠或相交。
-   * 
+   *
    * @param a - 第一个网格位置
    * @param b - 第二个网格位置
    * @returns 如果位置相交/重叠则返回`true`，否则返回`false`
-   * 
+   *
    * 逻辑使用不相交条件的反面：
    * - a完全在b下方 `(a.y >= b.y + b.h)`
    * - a完全在b上方 `(a.y + a.h <= b.y)`
@@ -293,13 +293,13 @@ export class Utils {
 
   /**
    * returns true if a and b touch edges or corners
-   * 
+   *
    * 检查两个网格位置是否彼此接触（共享边缘或角落）。
-   * 
+   *
    * @param a - 第一个网格位置
    * @param b - 第二个网格位置
    * @returns 如果两个位置彼此接触（共享边缘或角落）则返回 true，否则返回 false
-   * 
+   *
    * @remarks 通过扩展 b 的范围来检测接触：
    * - 扩展 b 的每个边缘 0.5 个单位
    * - 检查扩展区域是否与 a 相交
@@ -314,15 +314,15 @@ export class Utils {
     })
   }
 
-  /** 
+  /**
    * returns the area a and b overlap
-   * 
+   *
    * 计算两个网格位置重叠的面积
-   * 
+   *
    * @param a - 第一个网格位置
    * @param b - 第二个网格位置
    * @returns 重叠区域的面积（单位为网格单元）。如果没有重叠，则返回0
-   * 
+   *
    * @remarks
    * 算法通过找出重叠区域的边界来计算面积：
    * 1. 找出重叠矩形的左边界 x0（a和b的x最大值）
@@ -367,19 +367,19 @@ export class Utils {
     });
   }
 
-  /** 
+  /**
    * find an item by id
-   * 
-   * 通过id查找项目 
+   *
+   * 通过id查找项目
    * */
   static find(nodes: GridStackNode[], id: string): GridStackNode | undefined {
     return id ? nodes.find(n => n.id === id) : undefined;
   }
 
-  /** 
+  /**
    * convert value to boolean
-   * 
-   * 将值转换为布尔值 
+   *
+   * 将值转换为布尔值
    * */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static toBool(v: unknown): boolean {
@@ -393,35 +393,35 @@ export class Utils {
     return Boolean(v);
   }
 
-  /** 
+  /**
    * convert string to number
-   * 
-   * 将字符串转换为数字 
+   *
+   * 将字符串转换为数字
    * */
   static toNumber(value: null | string): number {
     return (value === null || value.length === 0) ? undefined : Number(value);
   }
 
-  /** 
+  /**
    * parse height value with unit
-   * 
+   *
    * 解析高度值并提取数值和单位部分
-   * 
+   *
    * @param val - 要解析的高度值，可以是数字或带单位的字符串（如'10px'、'2em'等）
    * @returns 包含高度数值和单位的HeightData对象
-   * 
+   *
    * @example
    * // 解析像素值
    * const result1 = Utils.parseHeight('100px'); // {h: 100, unit: 'px'}
-   * 
+   *
    * @example
    * // 解析百分比值
    * const result2 = Utils.parseHeight('50%'); // {h: 50, unit: '%'}
-   * 
+   *
    * @example
    * // 解析数字（默认单位为px）
    * const result3 = Utils.parseHeight(75); // {h: 75, unit: 'px'}
-   * 
+   *
    * @throws 如果提供的字符串格式无效，则抛出错误
    */
   static parseHeight(val: numberOrString): HeightData {
@@ -447,21 +447,21 @@ export class Utils {
    * 将目标中未设置的字段复制为使用给定的默认源值 */
   // eslint-disable-next-line
   /** 将源对象中的所有未在目标对象中设置的字段复制到目标对象中
-   * 
+   *
    * 递归地设置默认值，用源对象中的值填充目标对象中的未定义字段
-   * 
+   *
    * @param target - 要填充默认值的目标对象
    * @param sources - 一个或多个源对象，包含要用作默认值的属性
    * @returns 修改后的目标对象
-   * 
+   *
    * @example
    * // 设置默认配置
    * const options = Utils.defaults({width: 100}, defaultOptions);
-   * 
+   *
    * @example
    * // 深度合并多个对象中的未设置字段
    * const result = Utils.defaults({}, objA, objB, objC);
-   * 
+   *
    * @remarks
    * - 只有当目标对象中的字段为null或undefined时，才会从源对象复制
    * - 对于对象类型的字段，会递归进行相同的默认值设置
@@ -484,15 +484,15 @@ export class Utils {
     return target;
   }
 
-  /** 
+  /**
    * given 2 objects return true if they have the same values. Checks for Object {} having same fields and values (just 1 level down)
-   * 
+   *
    * 比较两个对象是否完全相等（仅检查一层深度）
-   * 
+   *
    * @param a - 第一个要比较的对象
    * @param b - 第二个要比较的对象
    * @returns 如果两个对象相等则返回true，否则返回false
-   * 
+   *
    * @remarks
    * - 如果参数不是对象类型，使用宽松相等（==）比较
    * - 如果类型不同，返回false
@@ -514,14 +514,14 @@ export class Utils {
 
   /**
    * copies over b size & position (GridStackPosition), and optionally min/max as well
-   * 
+   *
    * 从一个网格部件复制大小和位置属性到另一个部件
-   * 
+   *
    * @param a - 目标网格部件，接收复制的属性
    * @param b - 源网格部件，提供要复制的属性
    * @param doMinMax - 是否同时复制最小/最大尺寸限制，默认为false
    * @returns 修改后的目标网格部件
-   * 
+   *
    * @remarks
    * - 仅复制已定义的属性（undefined值不会覆盖目标值）
    * - 可选择是否复制minW/minH/maxW/maxH等尺寸限制
@@ -533,23 +533,23 @@ export class Utils {
     if (b.h !== undefined) a.h = b.h;
     if (doMinMax) {
       if (b.minW) a.minW = b.minW;
-      if (b.minH) a.minH = b.minH; 
+      if (b.minH) a.minH = b.minH;
       if (b.maxW) a.maxW = b.maxW;
       if (b.maxH) a.maxH = b.maxH;
     }
     return a;
   }
 
-  /** 
+  /**
    * true if a and b has same size & position
-   * 
+   *
    * 检查两个网格位置是否完全相同
-   * 
+   *
    * @param a - 第一个网格位置
    * @param b - 第二个网格位置
    * @returns 如果两个位置有相同的x、y、w、h值则返回true，否则返回false
-   * 
-   * @remarks 
+   *
+   * @remarks
    * - 如果任一参数为null/undefined，返回false
    * - w和h属性如果未定义则默认为1
    * - x和y必须完全相等
@@ -558,19 +558,19 @@ export class Utils {
     return a && b && a.x === b.x && a.y === b.y && (a.w || 1) === (b.w || 1) && (a.h || 1) === (b.h || 1);
   }
 
-  /** 
+  /**
    * given a node, makes sure it's min/max are valid
-   * 
+   *
    * 清理节点的最小/最大尺寸限制
-   * 
+   *
    * 删除节点中值为0、undefined或null的最小/最大尺寸属性。
-   * 
+   *
    * @param node - 要清理的网格节点
-   * 
+   *
    * @remarks
    * 检查并删除以下属性（如果它们的值为假值）：
    * - minW: 最小宽度
-   * - minH: 最小高度  
+   * - minH: 最小高度
    * - maxW: 最大宽度
    * - maxH: 最大高度
    */
@@ -582,20 +582,20 @@ export class Utils {
     if (!node.maxH) { delete node.maxH; }
   }
 
-  /** 
+  /**
    * removes field from the first object if same as the second objects (like diffing) and internal '_' for saving
-   * 
+   *
    * 移除第一个对象中与第二个对象相同的字段，以及内部字段（以'_'开头的字段）
-   * 
+   *
    * @param a - 要清理的对象
    * @param b - 用于比较的对象
-   * 
+   *
    * @remarks
    * - 移除 a 中以'_'开头的字段
    * - 如果 a 中字段值与 b 中相同字段的值相等，则移除该字段
    * - 递归处理嵌套对象，如果嵌套对象为空则移除该字段
    * - 如果 a 或 b 不是对象类型，直接返回
-   * 
+   *
    * @example
    * const a = {
    *   _internal: 123,
@@ -629,14 +629,14 @@ export class Utils {
     }
   }
 
-  /** 
+  /**
    * removes internal fields '_' and default values for saving
-   * 
+   *
    * 删除内部字段和默认值以便保存
-   * 
+   *
    * @param n - 需要清理的网格节点
    * @param removeEl - 是否同时移除el引用，默认为true
-   * 
+   *
    * @remarks
    * 此方法会删除:
    * - 所有以'_'开头的内部字段
@@ -649,7 +649,7 @@ export class Utils {
   static removeInternalForSave(n: GridStackNode, removeEl = true): void {
     // 删除所有内部字段(以'_'开头)和空值
     for (let key in n) { if (key[0] === '_' || n[key] === null || n[key] === undefined) delete n[key]; }
-    
+
     // 删除grid引用
     delete n.grid;
     // 可选删除el DOM引用
@@ -660,7 +660,7 @@ export class Utils {
     if (!n.noResize) delete n.noResize;     // 允许调整大小
     if (!n.noMove) delete n.noMove;         // 允许移动
     if (!n.locked) delete n.locked;         // 未锁定
-    
+
     // 删除默认或最小的尺寸值
     if (n.w === 1 || n.w === n.minW) delete n.w;  // 宽度为1或最小宽度
     if (n.h === 1 || n.h === n.minH) delete n.h;  // 高度为1或最小高度
@@ -675,26 +675,26 @@ export class Utils {
   //   return null;
   // }
 
-  /** 
+  /**
    * delay calling the given function for given delay, preventing new calls from happening while waiting
-   * 
+   *
    * 节流函数，用于限制函数的调用频率
-   * 
+   *
    * @param func - 要节流的函数
    * @param delay - 延迟时间（毫秒）
    * @returns 节流后的函数
-   * 
-   * @remarks 
+   *
+   * @remarks
    * - 在延迟期间，多次调用只会执行一次
    * - isWaiting 标志用于跟踪是否在等待期间
    * - 使用 setTimeout 来延迟执行
-   * 
+   *
    * @example
    * // 创建一个节流函数，最少间隔100ms执行一次
    * const throttledFunc = Utils.throttle(() => {
    *   console.log('处理事件');
    * }, 100);
-   * 
+   *
    * // 多次快速调用，但函数最多每100ms执行一次
    * element.addEventListener('mousemove', throttledFunc);
    */
@@ -711,9 +711,9 @@ export class Utils {
     }
   }
 
-  /** 
+  /**
    * remove positioning styles from element
-   * 
+   *
    * 删除一个HTML元素中的定位样式（position、left、top、width、height）
    * @param el - 要删除定位样式的HTML元素
    */
@@ -737,24 +737,24 @@ export class Utils {
     }
   }
 
-  /** 
+  /**
    * @internal returns the passed element if scrollable, else the closest parent that will, up to the entire document scrolling element
-   * 
+   *
    * 获取可滚动的元素
-   * 
+   *
    * @param el - 可选的起始HTML元素。如果未提供，则返回文档的滚动元素。
    * @returns 如果传入元素可滚动则返回该元素，否则返回最近的可滚动父元素，
    *          如果都没有则返回文档的滚动元素
-   * 
+   *
    * @remarks
    * - 如果未提供元素，返回document.scrollingElement或document.documentElement(IE支持)
    * - 检查元素的overflow和overflowY样式是否包含'auto'或'scroll'值
    * - 如果当前元素不可滚动，则递归检查其父元素
-   * 
+   *
    * @example
    * // 获取元素的最近可滚动父元素
    * const scrollEl = Utils.getScrollElement(myElement);
-   * 
+   *
    * @example
    * // 获取文档的滚动元素
    * const docScrollEl = Utils.getScrollElement();
@@ -771,15 +771,15 @@ export class Utils {
     }
   }
 
-  /** 
+  /**
    * @internal update scroll position based on element position
-   * 
+   *
    * 根据元素位置更新滚动位置
-   * 
-   * @param el - 要滚动的HTML元素 
+   *
+   * @param el - 要滚动的HTML元素
    * @param position - 包含top属性的位置对象
    * @param distance - 滚动距离
-   * 
+   *
    * @remarks
    * 此方法检查元素是否在视口中,并根据需要调整滚动位置:
    * - 如果元素在视口上方或下方,会滚动到适当位置使其可见
@@ -866,18 +866,18 @@ export class Utils {
     }
   }
 
-  /** 
+  /**
    * single level clone, returning a new object with same top fields. This will share sub objects and arrays
-   * 
+   *
    * 浅克隆对象，创建原始对象的一级复制。
-   * 
+   *
    * 此方法创建一个新对象，其中包含原始对象的所有顶级属性。
    * 对于简单值类型会创建副本，但对于嵌套对象和数组仅复制引用。
-   * 
+   *
    * @template T - 要克隆的对象类型
    * @param obj - 要克隆的对象
    * @returns 原始对象的浅克隆
-   * 
+   *
    * @remarks
    * - 如果输入是null、undefined或非对象，则原样返回。
    * - 如果输入是数组，则返回一个新数组，其中包含原始数组的所有元素。
@@ -899,13 +899,13 @@ export class Utils {
   /**
    * Recursive clone version that returns a full copy, checking for nested objects and arrays ONLY.
    * Note: this will use as-is any key starting with double __ (and not copy inside) some lib have circular dependencies.
-   * 
+   *
    * 创建对象的深度克隆。
-   * 
+   *
    * 此方法对输入对象执行深度复制，递归地克隆嵌套对象。
    * 它会跳过`skipFields`数组中指定的某些字段，如'parentGrid'、'el'、'grid'、'subGrid'和'engine'。
    * 名称以'__'开头的属性也会被跳过，同样函数和循环依赖也不会被复制。
-   * 
+   *
    * @template T - 要克隆的对象类型
    * @param obj - 要创建深度克隆的对象
    * @returns 输入对象的深度克隆
@@ -930,16 +930,16 @@ export class Utils {
 
   /**
    * deep clone the given HTML node, removing the unique id field
-   * 
+   *
    * 深度克隆给定的HTML节点，同时移除唯一ID字段
-   * 
+   *
    * @param el - 要克隆的HTML元素
    * @returns 克隆后的HTML元素（不包含原始ID属性）
-   * 
+   *
    * @example
    * // 克隆一个元素并移除其ID
    * const clone = Utils.cloneNode(originalElement);
-   * 
+   *
    * @remarks
    * 此方法使用原生的cloneNode(true)方法创建深度复制，
    * 然后移除ID属性以避免DOM中出现重复ID。
@@ -951,18 +951,18 @@ export class Utils {
     return node;
   }
 
-  /** 
+  /**
    * append element to parent
-   * 
+   *
    * 将元素附加到父元素
-   * 
+   *
    * @param el - 要附加的HTML元素
    * @param parent - 目标父元素，可以是字符串选择器或HTMLElement对象
-   * 
+   *
    * @example
    * // 通过选择器将元素附加到父元素
    * Utils.appendTo(newElement, '#container');
-   * 
+   *
    * @example
    * // 直接将元素附加到DOM节点
    * Utils.appendTo(newElement, parentNode);
@@ -979,25 +979,25 @@ export class Utils {
     }
   }
 
-  /** 
+  /**
    * add styles to element
-   * 
+   *
    * 向HTML元素添加样式
-   * 
+   *
    * @param el - 要应用样式的HTML元素
    * @param styles - 包含样式属性和值的对象。值可以是字符串或字符串数组（用于提供后备值）
-   * 
+   *
    * @example
    * // 添加单个样式
    * Utils.addElStyles(element, { color: 'red' });
-   * 
+   *
    * @example
    * // 添加多个样式
-   * Utils.addElStyles(element, { 
+   * Utils.addElStyles(element, {
    *   color: 'red',
    *   backgroundColor: 'blue'
    * });
-   * 
+   *
    * @example
    * // 添加带有后备值的样式（如CSS前缀）
    * Utils.addElStyles(element, {
@@ -1028,13 +1028,13 @@ export class Utils {
 
   /**
    * initialize event with properties from existing event
-   * 
+   *
    * 使用现有事件的属性初始化一个新事件对象
-   * 
+   *
    * @param e - 源事件对象(DragEvent或MouseEvent)
    * @param info - 包含新事件类型和可选目标的配置对象
    * @returns 初始化后的新事件对象
-   * 
+   *
    * @remarks
    * 此方法从源事件复制关键属性到新事件对象，包括：
    * - 修饰键状态(alt, ctrl, meta, shift)
@@ -1056,15 +1056,15 @@ export class Utils {
     return { ...evt, ...obj } as unknown as T;
   }
 
-  /** 
+  /**
    * copies the MouseEvent (or convert Touch) properties and sends it as another event to the given target
-   * 
+   *
    * 通过创建并分发指定类型的新MouseEvent来模拟鼠标事件。
-   * 
+   *
    * @param e - 用作模拟事件模板的原始MouseEvent或Touch对象
    * @param simulatedType - 要模拟的鼠标事件类型（例如，'mousedown'、'mouseup'、'click'）
    * @param target - 可选的目标元素，用于分发事件。如果未提供，则使用原始事件的目标
-   * 
+   *
    * @remarks
    * 此方法创建一个新的MouseEvent，其属性从原始事件复制而来，
    * 然后在指定的目标或原始事件的目标上分发它。
@@ -1096,12 +1096,12 @@ export class Utils {
   /**
    * defines an element that is used to get the offset and scale from grid transforms
    * returns the scale and offsets from said element
-   * 
+   *
    * 计算变换后父元素的缩放和偏移值。
-   * 
+   *
    * 此方法在父元素内创建一个临时div元素，测量其边界客户端矩形，
    * 然后计算由于CSS变换应用于父元素的缩放因子和偏移量。
-   * 
+   *
    * @param parent - 要获取变换值的HTMLElement
    * @returns 一个包含缩放因子和偏移量的DragTransform对象：
    *          - xScale: x轴上的逆缩放因子
@@ -1132,15 +1132,15 @@ export class Utils {
     }
   }
 
-  /** 
+  /**
    * swap the given object 2 field values
-   * 
+   *
    * 交换给定对象的两个字段值
-   * 
+   *
    * @param o - 要操作的对象
    * @param a - 第一个字段名
    * @param b - 第二个字段名
-   * 
+   *
    * @example
    * // 交换对象中的x和y值
    * const pos = {x: 10, y: 20};
@@ -1164,14 +1164,14 @@ export class Utils {
   //   return el.contains(target);
   // }
 
-  /** 
+  /**
    * true if the item can be rotated (checking for prop, not space available)
-   * 
+   *
    * 判断一个网格节点是否可以旋转
-   * 
+   *
    * @param n - 要检查的网格节点
    * @returns 如果节点可以旋转则返回true，否则返回false
-   * 
+   *
    * 以下情况节点不能旋转：
    * - 节点为空
    * - 节点宽度等于高度（已经是正方形）
